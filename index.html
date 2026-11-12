@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#090d16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MD L3 L1 ज़ोन स्कैनर</title>
+    
+    <!-- PWA Manifest for Chrome Install / APK Conversion -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20L3%20L1%20%E0%A4%9C%E0%A4%BC%E0%A5%8B%E0%A4%A8%20%E0%A4%B8%E0%A5%8D%E0%A4%95%E0%A5%88%E0%A4%A8%E0%A4%B0%22%2C%22short_name%22%3A%22MD%20L3%20L1%20%E0%A4%9C%E0%A4%BC%E0%A5%8B%E0%A4%A8%20%E0%A4%B8%E0%A5%8D%E0%A4%95%E0%A5%88%E0%A4%A8%E0%A4%B0%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
+
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: #131b2e;
+            --card-hover: #1e293b;
+            --accent: #2563eb;
+            --cyan: #38bdf8;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding-bottom: 90px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(180deg, #131b2e 0%, #090d16 100%);
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        .header-title p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .live-btn {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green);
+            border: 1px solid var(--green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--green);
+            border-radius: 50%;
+            animation: pulse 1.4s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Top Action Bar */
+        .action-bar {
+            padding: 10px 16px;
+            background: #0d1322;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .today-tag {
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            background: #1e293b;
+            padding: 5px 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--cyan);
+        }
+
+        .popup-trigger-btn {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid var(--amber);
+            color: var(--amber);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Summary Banner */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 12px 16px;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .summary-card span {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .summary-card strong {
+            font-size: 1.35rem;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* Breadcrumb Navigation */
+        .breadcrumb {
+            padding: 10px 16px;
+            font-size: 0.8rem;
+            background: rgba(37, 99, 235, 0.1);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb a {
+            color: var(--cyan);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .breadcrumb span.active-crumb {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* Main Container */
+        .container {
+            padding: 16px;
+        }
+
+        /* LEVEL 1: Timeframes Grid */
+        .tf-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .tf-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .tf-card:active {
+            transform: scale(0.97);
+        }
+
+        .tf-card.has-hits {
+            border-color: rgba(16, 185, 129, 0.45);
+        }
+
+        .tf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .tf-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .tf-count-box {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .tf-number {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--green);
+        }
+
+        .tf-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .tf-footer {
+            font-size: 0.72rem;
+            color: var(--cyan);
+            margin-top: 6px;
+        }
+
+        /* LEVEL 2: Sector / Theme Cards */
+        .sector-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .sector-card:active {
+            transform: scale(0.98);
+        }
+
+        .sector-card:hover {
+            border-color: var(--cyan);
+        }
+
+        .sector-left h3 {
+            font-size: 0.98rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .sector-left p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .sector-count-pill {
+            background: rgba(16, 185, 129, 0.18);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #34d399;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* LEVEL 3: Stock Cards */
+        .stock-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--green);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .stock-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .stock-sym {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .stock-company {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+        }
+
+        .crossing-badge {
+            display: inline-block;
+            margin-top: 5px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .stock-ltp-box {
+            text-align: right;
+        }
+
+        .stock-ltp {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--cyan);
+        }
+
+        .today-ohlc {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .zone-box {
+            background: #090d16;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin: 10px 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            font-size: 0.74rem;
+        }
+
+        .zone-col span {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .zone-col strong {
+            color: #f8fafc;
+        }
+
+        .stock-footer-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            border-top: 1px dashed #283548;
+            padding-top: 8px;
+            line-height: 1.45;
+        }
+
+        .stock-footer-meta b {
+            color: #cbd5e1;
+        }
+
+        /* POP-UP MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 16px;
+        }
+
+        .modal-card {
+            background: #131b2e;
+            border: 1px solid var(--cyan);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 430px;
+            padding: 18px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            animation: popIn 0.25s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .modal-head h3 {
+            font-size: 1rem;
+            color: var(--cyan);
+        }
+
+        .close-x {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .popup-row {
+            background: #090d16;
+            border-left: 3px solid var(--green);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .popup-row:hover {
+            background: #111827;
+        }
+
+        .popup-row-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .popup-row-sub {
+            font-size: 0.73rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .modal-close-btn {
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <h1>MD L3 L1 ज़ोन स्कैनर</h1>
+            <p>Next Period Cam L3 + Trad Pivot L1/S1 Zone (NSE)</p>
+        </div>
+        <button class="live-btn" onclick="simulateTodayCandleTick()">
+            <div class="dot"></div>
+            <span>Live Scan</span>
+        </button>
+    </header>
+
+    <div class="action-bar">
+        <div class="today-tag" id="today-date-label">📅 Today's Candle Crossover Only</div>
+        <button class="popup-trigger-btn" onclick="showSectorPopup()">🔔 Alert Count (<span id="popup-badge-count">0</span>)</button>
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span>Today Crossing Stocks (All TF)</span>
+            <strong id="stat-total-stocks" style="color: var(--green);">0</strong>
+        </div>
+        <div class="summary-card">
+            <span>Sectors / Themes Active Today</span>
+            <strong id="stat-total-sectors" style="color: var(--cyan);">0</strong>
+        </div>
+    </div>
+
+    <!-- Breadcrumb Bar -->
+    <div class="breadcrumb" id="breadcrumb"></div>
+
+    <!-- Dynamic Tab Content -->
+    <div class="container" id="main-container"></div>
+
+    <!-- Alert Count Pop-up -->
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3>⚡ MD L3 L1 ज़ोन क्रॉसओवर अलर्ट</h3>
+                <button class="close-x" onclick="closeSectorPopup()">&times;</button>
+            </div>
+            <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 10px;">
+                आज की कैंडल द्वारा <b>Next Period Cam L3 & Trad L1/S1 Zone</b> क्रॉस करने वाले टाइमफ्रेम और सेक्टर्स का लाइव काउंट (क्लिक करके खोलें):
+            </p>
+            <div id="popup-list" style="max-height: 310px; overflow-y: auto;"></div>
+            <button class="modal-close-btn" onclick="closeSectorPopup()">OK / Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Set Today's Date
+        const todayStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        document.getElementById('today-date-label').innerText = `📅 Today: ${todayStr}`;
+
+        // =========================================================================
+        // 1. PINE SCRIPT FORMULA: Next Period Cam L3 & Traditional Pivot L1 (S1)
+        // =========================================================================
+        function getNextPeriodZone(prevH, prevL, prevC) {
+            const range = prevH - prevL;
+            // Next Period Camarilla L3
+            const camL3 = prevC - (range * 1.1 / 4);
+            // Next Period Traditional Pivot L1 (Support 1)
+            const pp = (prevH + prevL + prevC) / 3;
+            const tradL1 = (2 * pp) - prevH;
+
+            const zoneHigh = Math.max(camL3, tradL1);
+            const zoneLow  = Math.min(camL3, tradL1);
+
+            return {
+                camL3: parseFloat(camL3.toFixed(2)),
+                tradL1: parseFloat(tradL1.toFixed(2)),
+                zoneHigh: parseFloat(zoneHigh.toFixed(2)),
+                zoneLow: parseFloat(zoneLow.toFixed(2))
+            };
+        }
+
+        // =========================================================================
+        // 2. TODAY'S CANDLE CROSSOVER CHECKER
+        // =========================================================================
+        function isCrossingToday(stock, zone) {
+            const candleTouchedZone = (stock.todayLow <= zone.zoneHigh) && (stock.todayHigh >= zone.zoneLow);
+            const crossedUpToday = (stock.yesterdayClose < zone.zoneLow) && (stock.todayClose >= zone.zoneLow);
+            const crossedDownToday = (stock.yesterdayClose > zone.zoneHigh) && (stock.todayClose <= zone.zoneHigh);
+
+            return candleTouchedZone || crossedUpToday || crossedDownToday;
+        }
+
+        // =========================================================================
+        // 3. ALL 6 TIMEFRAMES DEFINITION
+        // =========================================================================
+        const TIMEFRAMES = [
+            { id: 'Daily',      title: 'Daily (D)',          sub: 'Next Day Cam L3 + Trad L1' },
+            { id: 'Weekly',     title: 'Weekly (W)',         sub: 'Next Week Cam L3 + Trad L1' },
+            { id: 'Monthly',    title: 'Monthly (M)',        sub: 'Next Month Cam L3 + Trad L1' },
+            { id: 'Quarterly',  title: 'Quarterly (3M)',     sub: 'Next Quarter Cam L3 + Trad L1' },
+            { id: 'HalfYearly', title: 'Half-Yearly (6M)',   sub: 'Next 6-Month Cam L3 + Trad L1' },
+            { id: 'Yearly',     title: 'Yearly (12M)',       sub: 'Next Year Cam L3 + Trad L1' }
+        ];
+
+        // =========================================================================
+        // 4. NSE STOCKS DATASET
+        // =========================================================================
+        let rawStocks = [
+            // --- DAILY ---
+            { symbol: "HAL", name: "Hindustan Aeronautics Ltd", tf: "Daily", sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace & Defense", category: "Large Cap", prevH: 4820, prevL: 4720, prevC: 4795, yesterdayClose: 4755, todayOpen: 4760, todayHigh: 4792, todayLow: 4750, todayClose: 4784 },
+            { symbol: "BEL", name: "Bharat Electronics Ltd", tf: "Daily", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense Equipment", category: "Large Cap", prevH: 316, prevL: 306, prevC: 313, yesterdayClose: 307, todayOpen: 308, todayHigh: 314, todayLow: 307.5, todayClose: 312.5 },
+            { symbol: "MAZDOCK", name: "Mazagon Dock Shipbuilders", tf: "Daily", sector: "Defense & Aerospace", theme: "Naval Shipbuilding", industry: "Shipbuilding", category: "Mid Cap", prevH: 4360, prevL: 4220, prevC: 4320, yesterdayClose: 4260, todayOpen: 4265, todayHigh: 4315, todayLow: 4255, todayClose: 4302 },
+            { symbol: "ITC", name: "ITC Limited", tf: "Daily", sector: "FMCG & Consumption", theme: "Rural Consumption", industry: "Diversified FMCG", category: "Large Cap", prevH: 509, prevL: 499, prevC: 506, yesterdayClose: 500, todayOpen: 501, todayHigh: 506.5, todayLow: 500.2, todayClose: 504.8 },
+            { symbol: "TATACONSUM", name: "Tata Consumer Products", tf: "Daily", sector: "FMCG & Consumption", theme: "Packaged Foods & Tea", industry: "FMCG", category: "Large Cap", prevH: 1140, prevL: 1110, prevC: 1132, yesterdayClose: 1115, todayOpen: 1118, todayHigh: 1134, todayLow: 1116, todayClose: 1129 },
+
+            // --- WEEKLY ---
+            { symbol: "RELIANCE", name: "Reliance Industries Ltd", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "Energy & Telecom Giant", industry: "Refineries & Petrochemicals", category: "Large Cap", prevH: 3050, prevL: 2960, prevC: 3020, yesterdayClose: 2980, todayOpen: 2985, todayHigh: 3018, todayLow: 2982, todayClose: 3010 },
+            { symbol: "ONGC", name: "Oil & Natural Gas Corp", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "PSU Oil Exploration", industry: "Oil Exploration", category: "Large Cap", prevH: 298, prevL: 286, prevC: 294, yesterdayClose: 288, todayOpen: 289, todayHigh: 295, todayLow: 288.5, todayClose: 293.2 },
+            { symbol: "TCS", name: "Tata Consultancy Services", tf: "Weekly", sector: "IT & Digital", theme: "AI & Cloud Services", industry: "IT Consulting", category: "Large Cap
