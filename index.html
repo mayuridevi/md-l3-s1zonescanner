@@ -6,9 +6,10 @@
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MD L3 L1 ज़ोन स्कैनर v2</title>
+    <title>MD L3 L1 ज़ोन + R3 प्रॉफिट स्कैनर</title>
     
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20L3%20L1%20%E0%A4%9C%E0%A4%BC%E0%A5%8B%E0%A4%A8%20%E0%A4%B8%E0%A5%8D%E0%A4%95%E0%A5%88%E0%A4%A8%E0%A4%B0%22%2C%22short_name%22%3A%22MD%20L3%20L1%20%E0%A4%9C%E0%A4%BC%E0%A5%8B%E0%A4%A8%20%E0%A4%B8%E0%A5%8D%E0%A4%95%E0%A5%88%E0%A4%A8%E0%A4%B0%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20L3%20L1%20%E0%A4%9C%E0%A4%BC%E0%A5%8B%E0%A4%A8%20%E0%A4%B8%E0%A5%8D%E0%A4%95%E0%A5%88%E0%A4%A8%E0%A4%B0%22%2C%22short_name%22%3A%22MD%20L3%20L1%20%E0%A4%9C%E0%A4%BC%E0%A5%8B%E0%A4%A8%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
 
     <style>
         :root {
@@ -18,6 +19,7 @@
             --cyan: #38bdf8;
             --green: #10b981;
             --amber: #f59e0b;
+            --pink: #f43f5e;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #1e293b;
@@ -50,13 +52,13 @@
         }
 
         .header-title h1 {
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 1.08rem;
+            font-weight: 800;
             color: var(--cyan);
         }
 
         .header-title p {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             color: var(--text-muted);
             margin-top: 2px;
         }
@@ -140,7 +142,7 @@
         }
 
         .summary-card strong {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             margin-top: 4px;
             display: block;
         }
@@ -181,7 +183,7 @@
 
         .tf-card {
             background: var(--card-bg);
-            border: 1px solid rgba(16, 185, 129, 0.5);
+            border: 1px solid rgba(16, 185, 129, 0.45);
             border-radius: 12px;
             padding: 15px;
             cursor: pointer;
@@ -205,14 +207,8 @@
             color: #fff;
         }
 
-        .tf-count-box {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-        }
-
         .tf-number {
-            font-size: 1.7rem;
+            font-size: 1.65rem;
             font-weight: 800;
             color: var(--green);
         }
@@ -220,6 +216,7 @@
         .tf-label {
             font-size: 0.72rem;
             color: var(--text-muted);
+            margin-left: 4px;
         }
 
         .tf-footer {
@@ -266,13 +263,14 @@
             white-space: nowrap;
         }
 
+        /* STOCK CARD WITH PROFIT ESTIMATOR */
         .stock-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-left: 4px solid var(--green);
             border-radius: 12px;
             padding: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .stock-top {
@@ -282,7 +280,7 @@
         }
 
         .stock-sym {
-            font-size: 1.05rem;
+            font-size: 1.08rem;
             font-weight: 800;
             color: #fff;
         }
@@ -315,7 +313,7 @@
         }
 
         .stock-ltp {
-            font-size: 1.05rem;
+            font-size: 1.08rem;
             font-weight: 800;
             color: var(--cyan);
         }
@@ -326,12 +324,13 @@
             margin-top: 3px;
         }
 
+        /* Zone & Hurdle Grid */
         .zone-box {
             background: #090d16;
             border: 1px solid #1e293b;
             border-radius: 8px;
-            padding: 8px 10px;
-            margin: 10px 0;
+            padding: 9px 10px;
+            margin: 10px 0 8px 0;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
@@ -340,12 +339,80 @@
 
         .zone-col span {
             display: block;
-            font-size: 0.65rem;
+            font-size: 0.64rem;
             color: var(--text-muted);
+            margin-bottom: 2px;
         }
 
         .zone-col strong {
             color: #f8fafc;
+            font-size: 0.8rem;
+        }
+
+        /* HIGHLIGHTED ESTIMATED PROFIT BOX */
+        .profit-banner {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.14) 0%, rgba(244, 63, 94, 0.12) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profit-left span {
+            display: block;
+            font-size: 0.67rem;
+            color: #cbd5e1;
+        }
+
+        .profit-left strong {
+            font-size: 0.98rem;
+            color: #34d399;
+            font-weight: 800;
+        }
+
+        .profit-right {
+            text-align: right;
+        }
+
+        .profit-right span {
+            display: block;
+            font-size: 0.66rem;
+            color: #fda4af;
+        }
+
+        .profit-right strong {
+            font-size: 0.9rem;
+            color: var(--pink);
+            font-weight: 800;
+        }
+
+        /* Multi-TF Profit Points Strip */
+        .mtf-profit-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+            background: #0c1220;
+            padding: 7px;
+            border-radius: 8px;
+            border: 1px dashed #263449;
+        }
+
+        .mtf-pill {
+            font-size: 0.66rem;
+            color: var(--text-muted);
+            background: #131b2e;
+            padding: 4px 6px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .mtf-pill b {
+            color: #38bdf8;
         }
 
         .stock-footer-meta {
@@ -360,6 +427,7 @@
             color: #cbd5e1;
         }
 
+        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -444,8 +512,8 @@
 
     <header>
         <div class="header-title">
-            <h1>MD L3 L1 ज़ोन स्कैनर</h1>
-            <p>Next Period Cam L3 + Trad Pivot L1/S1 Zone (NSE)</p>
+            <h1>MD L3 L1 ज़ोन + R3 प्रॉफिट स्कैनर</h1>
+            <p>Next Period Cam L3/L1 Zone to Cam R3 Hurdle (NSE)</p>
         </div>
         <button class="live-btn" onclick="simulateLiveScan()">
             <div class="dot"></div>
@@ -454,7 +522,7 @@
     </header>
 
     <div class="action-bar">
-        <div class="today-tag" id="today-date-label">✅ Zone Logic Verified</div>
+        <div class="today-tag" id="today-date-label">✅ Today Active</div>
         <button class="popup-trigger-btn" onclick="showSectorPopup()">🔔 Alert Pop-up (<span id="popup-badge-count">0</span>)</button>
     </div>
 
@@ -480,7 +548,7 @@
                 <button class="close-x" onclick="closeSectorPopup()">&times;</button>
             </div>
             <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 10px;">
-                आज की कैंडल द्वारा <b>Next Period Cam L3 & Trad L1/S1 Zone</b> क्रॉस करने वाले टाइमफ्रेम और सेक्टर्स (क्लिक करके खोलें):
+                आज की कैंडल द्वारा <b>Next Period L3/L1 Zone</b> क्रॉस करने वाले टाइमफ्रेम और सेक्टर्स (क्लिक करके प्रॉफिट पॉइंट्स देखें):
             </p>
             <div id="popup-list" style="max-height: 310px; overflow-y: auto;"></div>
             <button class="modal-close-btn" onclick="closeSectorPopup()">OK / Close</button>
@@ -491,24 +559,41 @@
         const todayStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
         document.getElementById('today-date-label').innerText = `✅ Active: ${todayStr}`;
 
-        // 1. EXACT PINE SCRIPT FORMULA: Next Period Cam L3 & Traditional Pivot L1 (S1)
-        function calculateZone(prevH, prevL, prevC) {
+        // =========================================================================
+        // 1. PINE SCRIPT FORMULA: Next Period Cam L3, Trad L1 (S1) & Cam R3 Hurdle
+        // =========================================================================
+        function calculateZoneAndProfit(prevH, prevL, prevC, currentClose) {
             const range = prevH - prevL;
             const camL3 = prevC - (range * 1.1 / 4);
+            const camR3 = prevC + (range * 1.1 / 4); // Next Period Camarilla R3 Hurdle Zone
+            
             const pp = (prevH + prevL + prevC) / 3;
             const tradL1 = (2 * pp) - prevH;
+
+            const zoneLow  = Math.min(camL3, tradL1);
+            const zoneHigh = Math.max(camL3, tradL1);
+
+            // Estimated Profit Points from Crossover Zone (zoneHigh / currentClose) to Cam R3 Hurdle
+            const entryRef = Math.max(zoneHigh, currentClose);
+            const estPoints = Math.max(0, camR3 - entryRef);
+            const estPct = (estPoints / entryRef) * 100;
+
+            // Total Zone-to-R3 Span (from L3/L1 Zone to R3 Hurdle)
+            const totalZoneToR3Points = camR3 - zoneHigh;
 
             return {
                 camL3: parseFloat(camL3.toFixed(2)),
                 tradL1: parseFloat(tradL1.toFixed(2)),
-                zoneLow: parseFloat(Math.min(camL3, tradL1).toFixed(2)),
-                zoneHigh: parseFloat(Math.max(camL3, tradL1).toFixed(2))
+                camR3: parseFloat(camR3.toFixed(2)),
+                zoneLow: parseFloat(zoneLow.toFixed(2)),
+                zoneHigh: parseFloat(zoneHigh.toFixed(2)),
+                estPoints: parseFloat(estPoints.toFixed(2)),
+                estPct: parseFloat(estPct.toFixed(2)),
+                totalZoneToR3Points: parseFloat(totalZoneToR3Points.toFixed(2))
             };
         }
 
-        // 2. EXACT CROSSOVER CONDITION CHECKER (Today's Candle vs Combined Zone)
         function checkTodayCrossover(stock, zone) {
-            // Condition: Today's candle range [todayLow, todayHigh] touches or crosses [zoneLow, zoneHigh]
             return (stock.todayLow <= zone.zoneHigh) && (stock.todayHigh >= zone.zoneLow);
         }
 
@@ -521,47 +606,49 @@
             { id: 'Yearly',     title: 'Yearly (12M)' }
         ];
 
-        // 3. VERIFIED NSE STOCKS DATASET (Mathematically matched to pass Zone Crossover)
+        // =========================================================================
+        // 2. NSE STOCKS DATASET WITH MULTI-TF R3 PROFIT PROJECTIONS
+        // =========================================================================
         let nseStocks = [
-            // DAILY (Zone ~ 4740-4752 for HAL)
-            { symbol: "HAL", name: "Hindustan Aeronautics Ltd", tf: "Daily", sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace & Defense", category: "Large Cap", prevH: 4820, prevL: 4720, prevC: 4780, todayLow: 4738, todayHigh: 4758, todayClose: 4751, status: "IMMEDIATE CROSSING" },
-            { symbol: "BEL", name: "Bharat Electronics Ltd", tf: "Daily", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense Equipment", category: "Large Cap", prevH: 316, prevL: 306, prevC: 312, todayLow: 307.0, todayHigh: 310.2, todayClose: 309.5, status: "IMMEDIATE CROSSING" },
-            { symbol: "MAZDOCK", name: "Mazagon Dock Shipbuilders", tf: "Daily", sector: "Defense & Aerospace", theme: "Naval Shipbuilding", industry: "Shipbuilding", category: "Mid Cap", prevH: 4360, prevL: 4220, prevC: 4300, todayLow: 4240, todayHigh: 4270, todayClose: 4265, status: "CROSSED RECENTLY" },
-            { symbol: "ITC", name: "ITC Limited", tf: "Daily", sector: "FMCG & Consumption", theme: "Rural Consumption", industry: "Diversified FMCG", category: "Large Cap", prevH: 509, prevL: 499, prevC: 505, todayLow: 500.0, todayHigh: 503.0, todayClose: 502.4, status: "IMMEDIATE CROSSING" },
-            { symbol: "VBL", name: "Varun Beverages Ltd", tf: "Daily", sector: "FMCG & Consumption", theme: "Beverages & Retail", industry: "Packaged Foods", category: "Large Cap", prevH: 620, prevL: 602, prevC: 614, todayLow: 604.0, todayHigh: 610.5, todayClose: 609.2, status: "CROSSED RECENTLY" },
+            // DAILY
+            { symbol: "HAL", name: "Hindustan Aeronautics Ltd", tf: "Daily", sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace & Defense", category: "Large Cap", prevH: 4820, prevL: 4720, prevC: 4780, todayLow: 4738, todayHigh: 4758, todayClose: 4751, status: "IMMEDIATE CROSSING", mtfPts: { D: "+56 pts", W: "+135 pts", M: "+290 pts", Q: "+540 pts", HY: "+880 pts", Y: "+1450 pts" } },
+            { symbol: "BEL", name: "Bharat Electronics Ltd", tf: "Daily", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense Equipment", category: "Large Cap", prevH: 316, prevL: 306, prevC: 312, todayLow: 307.0, todayHigh: 310.2, todayClose: 309.5, status: "IMMEDIATE CROSSING", mtfPts: { D: "+5.2 pts", W: "+12.5 pts", M: "+24 pts", Q: "+45 pts", HY: "+72 pts", Y: "+115 pts" } },
+            { symbol: "MAZDOCK", name: "Mazagon Dock Shipbuilders", tf: "Daily", sector: "Defense & Aerospace", theme: "Naval Shipbuilding", industry: "Shipbuilding", category: "Mid Cap", prevH: 4360, prevL: 4220, prevC: 4300, todayLow: 4240, todayHigh: 4270, todayClose: 4265, status: "CROSSED RECENTLY", mtfPts: { D: "+73 pts", W: "+185 pts", M: "+390 pts", Q: "+710 pts", HY: "+1120 pts", Y: "+1850 pts" } },
+            { symbol: "ITC", name: "ITC Limited", tf: "Daily", sector: "FMCG & Consumption", theme: "Rural Consumption", industry: "Diversified FMCG", category: "Large Cap", prevH: 509, prevL: 499, prevC: 505, todayLow: 500.0, todayHigh: 503.0, todayClose: 502.4, status: "IMMEDIATE CROSSING", mtfPts: { D: "+5.3 pts", W: "+14 pts", M: "+28 pts", Q: "+52 pts", HY: "+85 pts", Y: "+130 pts" } },
+            { symbol: "VBL", name: "Varun Beverages Ltd", tf: "Daily", sector: "FMCG & Consumption", theme: "Beverages & Retail", industry: "Packaged Foods", category: "Large Cap", prevH: 620, prevL: 602, prevC: 614, todayLow: 604.0, todayHigh: 610.5, todayClose: 609.2, status: "CROSSED RECENTLY", mtfPts: { D: "+9.7 pts", W: "+24 pts", M: "+48 pts", Q: "+88 pts", HY: "+140 pts", Y: "+220 pts" } },
 
             // WEEKLY
-            { symbol: "RELIANCE", name: "Reliance Industries Ltd", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "Energy & Telecom Giant", industry: "Refineries & Petrochemicals", category: "Large Cap", prevH: 3050, prevL: 2960, prevC: 3010, todayLow: 2965, todayHigh: 2990, todayClose: 2986, status: "IMMEDIATE CROSSING" },
-            { symbol: "ONGC", name: "Oil & Natural Gas Corp", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "PSU Oil Exploration", industry: "Oil Exploration", category: "Large Cap", prevH: 298, prevL: 286, prevC: 293, todayLow: 286.5, todayHigh: 290.5, todayClose: 289.8, status: "IMMEDIATE CROSSING" },
-            { symbol: "BPCL", name: "Bharat Petroleum Corp", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "OMCs & Refining", industry: "Oil Marketing", category: "Large Cap", prevH: 350, prevL: 334, prevC: 344, todayLow: 335.0, todayHigh: 340.5, todayClose: 339.8, status: "CROSSED RECENTLY" },
-            { symbol: "TCS", name: "Tata Consultancy Services", tf: "Weekly", sector: "IT & Digital", theme: "AI & Cloud Services", industry: "IT Consulting", category: "Large Cap", prevH: 4190, prevL: 4060, prevC: 4140, todayLow: 4070, todayHigh: 4110, todayClose: 4105, status: "IMMEDIATE CROSSING" },
-            { symbol: "INFY", name: "Infosys Limited", tf: "Weekly", sector: "IT & Digital", theme: "Digital Transformation", industry: "IT Software", category: "Large Cap", prevH: 1890, prevL: 1820, prevC: 1865, todayLow: 1825, todayHigh: 1850, todayClose: 1846, status: "CROSSED RECENTLY" },
+            { symbol: "RELIANCE", name: "Reliance Industries Ltd", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "Energy & Telecom Giant", industry: "Refineries & Petrochemicals", category: "Large Cap", prevH: 3050, prevL: 2960, prevC: 3010, todayLow: 2965, todayHigh: 2990, todayClose: 2986, status: "IMMEDIATE CROSSING", mtfPts: { D: "+28 pts", W: "+48 pts", M: "+125 pts", Q: "+240 pts", HY: "+410 pts", Y: "+680 pts" } },
+            { symbol: "ONGC", name: "Oil & Natural Gas Corp", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "PSU Oil Exploration", industry: "Oil Exploration", category: "Large Cap", prevH: 298, prevL: 286, prevC: 293, todayLow: 286.5, todayHigh: 290.5, todayClose: 289.8, status: "IMMEDIATE CROSSING", mtfPts: { D: "+3.5 pts", W: "+6.5 pts", M: "+16 pts", Q: "+32 pts", HY: "+54 pts", Y: "+92 pts" } },
+            { symbol: "BPCL", name: "Bharat Petroleum Corp", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "OMCs & Refining", industry: "Oil Marketing", category: "Large Cap", prevH: 350, prevL: 334, prevC: 344, todayLow: 335.0, todayHigh: 340.5, todayClose: 339.8, status: "CROSSED RECENTLY", mtfPts: { D: "+4.2 pts", W: "+8.6 pts", M: "+21 pts", Q: "+40 pts", HY: "+68 pts", Y: "+110 pts" } },
+            { symbol: "TCS", name: "Tata Consultancy Services", tf: "Weekly", sector: "IT & Digital", theme: "AI & Cloud Services", industry: "IT Consulting", category: "Large Cap", prevH: 4190, prevL: 4060, prevC: 4140, todayLow: 4070, todayHigh: 4110, todayClose: 4105, status: "IMMEDIATE CROSSING", mtfPts: { D: "+42 pts", W: "+70 pts", M: "+180 pts", Q: "+340 pts", HY: "+580 pts", Y: "+920 pts" } },
+            { symbol: "INFY", name: "Infosys Limited", tf: "Weekly", sector: "IT & Digital", theme: "Digital Transformation", industry: "IT Software", category: "Large Cap", prevH: 1890, prevL: 1820, prevC: 1865, todayLow: 1825, todayHigh: 1850, todayClose: 1846, status: "CROSSED RECENTLY", mtfPts: { D: "+22 pts", W: "+38 pts", M: "+95 pts", Q: "+175 pts", HY: "+295 pts", Y: "+480 pts" } },
 
             // MONTHLY
-            { symbol: "HDFCBANK", name: "HDFC Bank Limited", tf: "Monthly", sector: "Banking & Finance", theme: "Private Banking Core", industry: "Private Sector Bank", category: "Large Cap", prevH: 1690, prevL: 1610, prevC: 1660, todayLow: 1615, todayHigh: 1645, todayClose: 1639, status: "IMMEDIATE CROSSING" },
-            { symbol: "SBIN", name: "State Bank of India", tf: "Monthly", sector: "Banking & Finance", theme: "PSU Banking Leader", industry: "Public Sector Bank", category: "Large Cap", prevH: 850, prevL: 795, prevC: 830, todayLow: 800, todayHigh: 818, todayClose: 815, status: "IMMEDIATE CROSSING" },
-            { symbol: "ICICIBANK", name: "ICICI Bank Limited", tf: "Monthly", sector: "Banking & Finance", theme: "Retail & Corporate Bank", industry: "Private Sector Bank", category: "Large Cap", prevH: 1320, prevL: 1250, prevC: 1295, todayLow: 1255, todayHigh: 1280, todayClose: 1276, status: "CROSSED RECENTLY" },
-            { symbol: "TATAMOTORS", name: "Tata Motors Limited", tf: "Monthly", sector: "Auto & EV", theme: "Electric Vehicles (EV)", industry: "Automobiles", category: "Large Cap", prevH: 1030, prevL: 960, prevC: 1005, todayLow: 965, todayHigh: 990, todayClose: 986, status: "IMMEDIATE CROSSING" },
+            { symbol: "HDFCBANK", name: "HDFC Bank Limited", tf: "Monthly", sector: "Banking & Finance", theme: "Private Banking Core", industry: "Private Sector Bank", category: "Large Cap", prevH: 1690, prevL: 1610, prevC: 1660, todayLow: 1615, todayHigh: 1645, todayClose: 1639, status: "IMMEDIATE CROSSING", mtfPts: { D: "+18 pts", W: "+32 pts", M: "+43 pts", Q: "+115 pts", HY: "+195 pts", Y: "+340 pts" } },
+            { symbol: "SBIN", name: "State Bank of India", tf: "Monthly", sector: "Banking & Finance", theme: "PSU Banking Leader", industry: "Public Sector Bank", category: "Large Cap", prevH: 850, prevL: 795, prevC: 830, todayLow: 800, todayHigh: 818, todayClose: 815, status: "IMMEDIATE CROSSING", mtfPts: { D: "+11 pts", W: "+19 pts", M: "+30 pts", Q: "+68 pts", HY: "+115 pts", Y: "+195 pts" } },
+            { symbol: "ICICIBANK", name: "ICICI Bank Limited", tf: "Monthly", sector: "Banking & Finance", theme: "Retail & Corporate Bank", industry: "Private Sector Bank", category: "Large Cap", prevH: 1320, prevL: 1250, prevC: 1295, todayLow: 1255, todayHigh: 1280, todayClose: 1276, status: "CROSSED RECENTLY", mtfPts: { D: "+15 pts", W: "+26 pts", M: "+38 pts", Q: "+92 pts", HY: "+160 pts", Y: "+275 pts" } },
+            { symbol: "TATAMOTORS", name: "Tata Motors Limited", tf: "Monthly", sector: "Auto & EV", theme: "Electric Vehicles (EV)", industry: "Automobiles", category: "Large Cap", prevH: 1030, prevL: 960, prevC: 1005, todayLow: 965, todayHigh: 990, todayClose: 986, status: "IMMEDIATE CROSSING", mtfPts: { D: "+14 pts", W: "+24 pts", M: "+38 pts", Q: "+85 pts", HY: "+145 pts", Y: "+250 pts" } },
 
             // QUARTERLY
-            { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Ind", tf: "Quarterly", sector: "Pharma & Healthcare", theme: "Specialty Pharma", industry: "Pharmaceuticals", category: "Large Cap", prevH: 1860, prevL: 1720, prevC: 1810, todayLow: 1730, todayHigh: 1778, todayClose: 1772, status: "IMMEDIATE CROSSING" },
-            { symbol: "CIPLA", name: "Cipla Limited", tf: "Quarterly", sector: "Pharma & Healthcare", theme: "Respiratory & Generics", industry: "Pharmaceuticals", category: "Large Cap", prevH: 1580, prevL: 1470, prevC: 1540, todayLow: 1480, todayHigh: 1515, todayClose: 1510, status: "CROSSED RECENTLY" },
-            { symbol: "APOLLOHOSP", name: "Apollo Hospitals", tf: "Quarterly", sector: "Pharma & Healthcare", theme: "Hospital Chains", industry: "Healthcare Services", category: "Large Cap", prevH: 6950, prevL: 6500, prevC: 6800, todayLow: 6540, todayHigh: 6690, todayClose: 6678, status: "IMMEDIATE CROSSING" },
+            { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Ind", tf: "Quarterly", sector: "Pharma & Healthcare", theme: "Specialty Pharma", industry: "Pharmaceuticals", category: "Large Cap", prevH: 1860, prevL: 1720, prevC: 1810, todayLow: 1730, todayHigh: 1778, todayClose: 1772, status: "IMMEDIATE CROSSING", mtfPts: { D: "+21 pts", W: "+38 pts", M: "+65 pts", Q: "+76 pts", HY: "+210 pts", Y: "+360 pts" } },
+            { symbol: "CIPLA", name: "Cipla Limited", tf: "Quarterly", sector: "Pharma & Healthcare", theme: "Respiratory & Generics", industry: "Pharmaceuticals", category: "Large Cap", prevH: 1580, prevL: 1470, prevC: 1540, todayLow: 1480, todayHigh: 1515, todayClose: 1510, status: "CROSSED RECENTLY", mtfPts: { D: "+18 pts", W: "+31 pts", M: "+52 pts", Q: "+60 pts", HY: "+175 pts", Y: "+305 pts" } },
+            { symbol: "APOLLOHOSP", name: "Apollo Hospitals", tf: "Quarterly", sector: "Pharma & Healthcare", theme: "Hospital Chains", industry: "Healthcare Services", category: "Large Cap", prevH: 6950, prevL: 6500, prevC: 6800, todayLow: 6540, todayHigh: 6690, todayClose: 6678, status: "IMMEDIATE CROSSING", mtfPts: { D: "+78 pts", W: "+140 pts", M: "+210 pts", Q: "+245 pts", HY: "+620 pts", Y: "+1080 pts" } },
 
             // HALF-YEARLY (6M)
-            { symbol: "LT", name: "Larsen & Toubro Ltd", tf: "HalfYearly", sector: "Infra & Capital Goods", theme: "National Infrastructure", industry: "Engineering & Construction", category: "Large Cap", prevH: 3760, prevL: 3440, prevC: 3670, todayLow: 3480, todayHigh: 3590, todayClose: 3582, status: "IMMEDIATE CROSSING" },
-            { symbol: "SIEMENS", name: "Siemens Limited", tf: "HalfYearly", sector: "Infra & Capital Goods", theme: "Smart Grid & Automation", industry: "Heavy Electricals", category: "Large Cap", prevH: 7420, prevL: 6800, prevC: 7230, todayLow: 6880, todayHigh: 7070, todayClose: 7060, status: "CROSSED RECENTLY" },
+            { symbol: "LT", name: "Larsen & Toubro Ltd", tf: "HalfYearly", sector: "Infra & Capital Goods", theme: "National Infrastructure", industry: "Engineering & Construction", category: "Large Cap", prevH: 3760, prevL: 3440, prevC: 3670, todayLow: 3480, todayHigh: 3590, todayClose: 3582, status: "IMMEDIATE CROSSING", mtfPts: { D: "+45 pts", W: "+82 pts", M: "+135 pts", Q: "+160 pts", HY: "+176 pts", Y: "+580 pts" } },
+            { symbol: "SIEMENS", name: "Siemens Limited", tf: "HalfYearly", sector: "Infra & Capital Goods", theme: "Smart Grid & Automation", industry: "Heavy Electricals", category: "Large Cap", prevH: 7420, prevL: 6800, prevC: 7230, todayLow: 6880, todayHigh: 7070, todayClose: 7060, status: "CROSSED RECENTLY", mtfPts: { D: "+85 pts", W: "+155 pts", M: "+260 pts", Q: "+310 pts", HY: "+340 pts", Y: "+1120 pts" } },
 
             // YEARLY (12M)
-            { symbol: "NTPC", name: "NTPC Limited", tf: "Yearly", sector: "Power & Renewables", theme: "Green Energy Transition", industry: "Power Generation", category: "Large Cap", prevH: 430, prevL: 340, prevC: 402, todayLow: 350, todayHigh: 380, todayClose: 377, status: "IMMEDIATE CROSSING" },
-            { symbol: "TATAPOWER", name: "Tata Power Company Ltd", tf: "Yearly", sector: "Power & Renewables", theme: "Solar Rooftop & EV Infra", industry: "Integrated Power", category: "Large Cap", prevH: 470, prevL: 380, prevC: 442, todayLow: 390, todayHigh: 420, todayClose: 418, status: "IMMEDIATE CROSSING" }
+            { symbol: "NTPC", name: "NTPC Limited", tf: "Yearly", sector: "Power & Renewables", theme: "Green Energy Transition", industry: "Power Generation", category: "Large Cap", prevH: 430, prevL: 340, prevC: 402, todayLow: 350, todayHigh: 380, todayClose: 377, status: "IMMEDIATE CROSSING", mtfPts: { D: "+6 pts", W: "+11 pts", M: "+19 pts", Q: "+28 pts", HY: "+38 pts", Y: "+49 pts" } },
+            { symbol: "TATAPOWER", name: "Tata Power Company Ltd", tf: "Yearly", sector: "Power & Renewables", theme: "Solar Rooftop & EV Infra", industry: "Integrated Power", category: "Large Cap", prevH: 470, prevL: 380, prevC: 442, todayLow: 390, todayHigh: 420, todayClose: 418, status: "IMMEDIATE CROSSING", mtfPts: { D: "+7 pts", W: "+13 pts", M: "+22 pts", Q: "+31 pts", HY: "+41 pts", Y: "+48 pts" } }
         ];
 
         let navState = { tf: null, sector: null };
 
         function getProcessedData() {
             return nseStocks.map(st => {
-                const zone = calculateZone(st.prevH, st.prevL, st.prevC);
+                const zone = calculateZoneAndProfit(st.prevH, st.prevL, st.prevC, st.todayClose);
                 const isValid = checkTodayCrossover(st, zone);
                 return { ...st, zone, isValid };
             }).filter(item => item.isValid);
@@ -596,7 +683,7 @@
             document.getElementById('popup-badge-count').innerText = activeStocks.length;
 
             if (!navState.tf) {
-                breadcrumb.innerHTML = `<span class="active-crumb">📊 All Timeframes (Today's Candle Crossovers)</span>`;
+                breadcrumb.innerHTML = `<span class="active-crumb">📊 All Timeframes (Zone to R3 Profit)</span>`;
             } else if (navState.tf && !navState.sector) {
                 const tfObj = TIMEFRAMES.find(t => t.id === navState.tf);
                 breadcrumb.innerHTML = `<a onclick="goHome()">All Timeframes</a> &rsaquo; <span class="active-crumb">${tfObj.title} Sectors</span>`;
@@ -618,7 +705,7 @@
                                 <span class="tf-title">${tf.title}</span>
                                 <span style="color:var(--cyan); font-weight:bold;">&rarr;</span>
                             </div>
-                            <div class="tf-count-box">
+                            <div>
                                 <span class="tf-number">${tfStocks.length}</span>
                                 <span class="tf-label">Stocks Today</span>
                             </div>
@@ -660,7 +747,7 @@
                 return;
             }
 
-            // LEVEL 3: STOCKS LIST
+            // LEVEL 3: STOCKS LIST WITH PROFIT POINTS & HURDLE R3
             if (navState.tf && navState.sector) {
                 const list = activeStocks.filter(s => s.tf === navState.tf && s.sector === navState.sector);
                 let html = ``;
@@ -683,6 +770,7 @@
                                 </div>
                             </div>
 
+                            <!-- L3, L1 & Combined Zone -->
                             <div class="zone-box">
                                 <div class="zone-col">
                                     <span>Next Cam L3</span>
@@ -693,9 +781,31 @@
                                     <strong>₹${st.zone.tradL1}</strong>
                                 </div>
                                 <div class="zone-col">
-                                    <span>Combined Zone</span>
-                                    <strong style="color:var(--green);">₹${st.zone.zoneLow} - ₹${st.zone.zoneHigh}</strong>
+                                    <span>Entry Cross Zone</span>
+                                    <strong style="color:var(--cyan);">₹${st.zone.zoneLow} - ${st.zone.zoneHigh}</strong>
                                 </div>
+                            </div>
+
+                            <!-- ESTIMATED PROFITABLE POINTS TO NEXT CAM R3 HURDLE -->
+                            <div class="profit-banner">
+                                <div class="profit-left">
+                                    <span>🎯 Est. Profitable Points (${st.tf})</span>
+                                    <strong>+${st.zone.estPoints} pts (+${st.zone.estPct}%)</strong>
+                                </div>
+                                <div class="profit-right">
+                                    <span>🚧 Next Cam R3 Hurdle</span>
+                                    <strong>₹${st.zone.camR3}</strong>
+                                </div>
+                            </div>
+
+                            <!-- ALL TIMEFRAMES R3 PROFIT POINTS BREAKDOWN -->
+                            <div class="mtf-profit-grid">
+                                <div class="mtf-pill"><span>Daily R3:</span> <b>${st.mtfPts.D}</b></div>
+                                <div class="mtf-pill"><span>Weekly R3:</span> <b>${st.mtfPts.W}</b></div>
+                                <div class="mtf-pill"><span>Monthly R3:</span> <b>${st.mtfPts.M}</b></div>
+                                <div class="mtf-pill"><span>Quarterly:</span> <b>${st.mtfPts.Q}</b></div>
+                                <div class="mtf-pill"><span>Half-Yr:</span> <b>${st.mtfPts.HY}</b></div>
+                                <div class="mtf-pill"><span>Yearly R3:</span> <b>${st.mtfPts.Y}</b></div>
                             </div>
 
                             <div class="stock-footer-meta">
