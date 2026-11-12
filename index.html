@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>MD Next Period ज़ोन + R3 & SMA चार्ट स्कैनर</title>
+    <title>MD Turbo NSE 500 / F&O ज़ोन स्कैनर</title>
     
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Next%20Period%20Chart%20Scanner%22%2C%22short_name%22%3A%22MD%20Chart%20Zone%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Turbo%20NSE%20Scanner%22%2C%22short_name%22%3A%22MD%20Turbo%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
 
     <style>
         :root {
@@ -43,21 +43,38 @@
         }
 
         .status-bar {
-            padding: 8px 16px; background: #0d1322; border-bottom: 1px solid var(--border);
-            font-size: 0.72rem; color: var(--amber); display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 16px; background: #0d1322; border-bottom: 1px solid var(--border);
+            font-size: 0.71rem; color: var(--amber); display: flex; justify-content: space-between; align-items: center;
         }
 
+        /* Progress Bar for Turbo Scan */
+        .progress-track { width: 100%; height: 3px; background: #1e293b; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #38bdf8); transition: width 0.2s; }
+
+        .index-strip {
+            display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px;
+            background: #0b101d; border-bottom: 1px solid var(--border);
+            scrollbar-width: none;
+        }
+        .index-strip::-webkit-scrollbar { display: none; }
+        .idx-pill {
+            background: var(--card-bg); border: 1px solid var(--border);
+            color: var(--text-muted); padding: 6px 12px; border-radius: 20px;
+            font-size: 0.74rem; font-weight: 700; white-space: nowrap; cursor: pointer;
+        }
+        .idx-pill.active { background: var(--accent); border-color: var(--cyan); color: #fff; }
+
         .search-bar {
-            padding: 10px 16px; background: #0b101d; border-bottom: 1px solid var(--border);
+            padding: 8px 16px; background: #0b101d; border-bottom: 1px solid var(--border);
             display: flex; gap: 8px;
         }
         .search-bar input {
             flex: 1; background: #131b2e; border: 1px solid var(--border); color: #fff;
-            padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; text-transform: uppercase;
+            padding: 8px 12px; border-radius: 8px; font-size: 0.78rem; text-transform: uppercase;
         }
         .search-bar button {
             background: var(--accent); color: #fff; border: none; padding: 8px 14px;
-            border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            border-radius: 8px; font-size: 0.76rem; font-weight: 700; cursor: pointer;
         }
 
         .mode-tabs {
@@ -103,12 +120,19 @@
         .stock-sym { font-size: 1.08rem; font-weight: 800; color: #fff; }
         .stock-ltp { font-size: 1.12rem; font-weight: 800; color: var(--cyan); text-align: right; }
 
-        .status-tag {
-            display: inline-block; margin-top: 5px; padding: 3px 8px; border-radius: 5px;
-            font-size: 0.67rem; font-weight: 700;
+        .badges-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+        .idx-badge {
+            padding: 2px 7px; border-radius: 4px; font-size: 0.64rem; font-weight: 700;
+            background: rgba(56, 189, 248, 0.15); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.35);
         }
-        .tag-cross { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .tag-watch { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .fno-badge {
+            padding: 2px 7px; border-radius: 4px; font-size: 0.64rem; font-weight: 700;
+            background: rgba(168, 85, 247, 0.2); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.45);
+        }
+        .cross-badge {
+            padding: 2px 7px; border-radius: 4px; font-size: 0.64rem; font-weight: 700;
+            background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45);
+        }
 
         .zone-box {
             background: #090d16; border: 1px solid #1e293b; border-radius: 8px;
@@ -125,7 +149,6 @@
         .profit-right { text-align: right; }
         .profit-right strong { font-size: 0.92rem; color: var(--pink); font-weight: 800; display: block; }
 
-        /* Chart Button Column/Action */
         .chart-btn {
             width: 100%; background: linear-gradient(90deg, #1d4ed8, #2563eb);
             color: #fff; border: 1px solid #60a5fa; padding: 9px 12px;
@@ -133,7 +156,6 @@
             cursor: pointer; margin-bottom: 10px; display: flex;
             justify-content: center; align-items: center; gap: 6px;
         }
-        .chart-btn:active { transform: scale(0.98); }
 
         .stock-footer-meta {
             font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed #283548; padding-top: 8px; line-height: 1.45;
@@ -141,7 +163,7 @@
 
         .loader { text-align: center; padding: 30px; color: var(--cyan); font-size: 0.9rem; font-weight: 600; }
 
-        /* FULL CHART MODAL */
+        /* CHART MODAL */
         .chart-modal {
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center;
@@ -155,49 +177,53 @@
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px;
         }
-        .chart-header h3 { font-size: 1rem; color: #fff; }
         .close-chart {
             background: #1e293b; border: none; color: #fff; width: 30px; height: 30px;
             border-radius: 50%; font-size: 1.2rem; cursor: pointer;
         }
         .canvas-wrap {
             background: #060911; border: 1px solid #1e293b; border-radius: 10px;
-            padding: 4px; margin-bottom: 10px; position: relative;
+            padding: 4px; margin-bottom: 10px;
         }
         canvas { width: 100%; height: 290px; display: block; }
-
-        /* SMA & Levels Legend Grid */
-        .levels-legend {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
-            font-size: 0.72rem;
-        }
+        .levels-legend { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 0.72rem; }
         .legend-item {
             background: #131b2e; padding: 6px 8px; border-radius: 6px;
             display: flex; justify-content: space-between; align-items: center;
             border-left: 3px solid #fff;
         }
-        .legend-item span { color: #cbd5e1; }
-        .legend-item strong { color: #fff; font-size: 0.78rem; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-title">
-            <h1>MD Next Period ज़ोन + SMA चार्ट</h1>
-            <p>Current Close &rarr; Next Period L3/L1, R3 & All SMAs</p>
+            <h1>MD Turbo NSE 500 / F&O स्कैनर</h1>
+            <p>Multi-Proxy High-Speed Scan &bull; L3/L1 & R3 Hurdle</p>
         </div>
-        <button class="btn-fetch" onclick="fetchAllRealNSEStocks()">🔄 Refresh NSE</button>
+        <button class="btn-fetch" onclick="fetchAllRealNSEStocks(true)">⚡ Turbo Scan</button>
     </header>
 
+    <div class="progress-track"><div class="progress-fill" id="scan-progress"></div></div>
+
     <div class="status-bar">
-        <span id="sync-status">⏳ Fetching actual NSE prices & SMAs...</span>
-        <span id="last-updated-time"></span>
+        <span id="sync-status">⚡ Ready</span>
+        <span id="universe-count-badge">0 Stocks</span>
+    </div>
+
+    <!-- INDEX / CATEGORY TABS -->
+    <div class="index-strip">
+        <div class="idx-pill active" id="idx-ALL" onclick="setIndexFilter('ALL')">All NSE (<span id="c-ALL">0</span>)</div>
+        <div class="idx-pill" id="idx-NIFTY50" onclick="setIndexFilter('NIFTY50')">NIFTY 50 (<span id="c-NIFTY50">0</span>)</div>
+        <div class="idx-pill" id="idx-NIFTY100" onclick="setIndexFilter('NIFTY100')">NIFTY 100 (<span id="c-NIFTY100">0</span>)</div>
+        <div class="idx-pill" id="idx-MIDCAP" onclick="setIndexFilter('MIDCAP')">Midcap 150 (<span id="c-MIDCAP">0</span>)</div>
+        <div class="idx-pill" id="idx-SMALLCAP" onclick="setIndexFilter('SMALLCAP')">Smallcap 250 (<span id="c-SMALLCAP">0</span>)</div>
+        <div class="idx-pill" id="idx-FNO" onclick="setIndexFilter('FNO')">⚡ F&O Only (<span id="c-FNO">0</span>)</div>
     </div>
 
     <div class="search-bar">
-        <input type="text" id="new-symbol-input" placeholder="NSE Symbol डालें (जैसे: LT, MARUTI)">
-        <button onclick="addCustomNSESymbol()">+ Scan Stock</button>
+        <input type="text" id="new-symbol-input" placeholder="NSE Symbol डालें (जैसे: MARUTI, TITAN)">
+        <button onclick="addCustomNSESymbol()">+ Instant Scan</button>
     </div>
 
     <div class="mode-tabs">
@@ -207,10 +233,10 @@
 
     <div class="breadcrumb" id="breadcrumb"></div>
     <div class="container" id="main-container">
-        <div class="loader">NSE मार्केट से असली प्राइस, Next Period लेवल्स और 5 SMAs लोड हो रहे हैं...</div>
+        <div class="loader">तेज़ स्कैनिंग शुरू हो रही है...</div>
     </div>
 
-    <!-- VISUAL CHART & SMA POP-UP MODAL -->
+    <!-- VISUAL CHART & SMA MODAL -->
     <div class="chart-modal" id="chartModal">
         <div class="chart-modal-card">
             <div class="chart-header">
@@ -220,13 +246,9 @@
                 </div>
                 <button class="close-chart" onclick="closeChartModal()">&times;</button>
             </div>
-
-            <div class="canvas-wrap">
-                <canvas id="stockCanvas"></canvas>
-            </div>
-
+            <div class="canvas-wrap"><canvas id="stockCanvas"></canvas></div>
             <div style="font-size:0.74rem; font-weight:700; color:#94a3b8; margin-bottom:6px;">
-                📍 Exact Line Positions (Today's Candle vs Levels & SMAs):
+                📍 Exact Line Positions (Candle vs Levels & 5 SMAs):
             </div>
             <div class="levels-legend" id="modal-levels-grid"></div>
         </div>
@@ -242,38 +264,93 @@
             { id: 'Yearly',     title: 'Yearly (12M)',     periodName: 'Next Year',      nextLabel: 'Next Year' }
         ];
 
-        let WATCHLIST = JSON.parse(localStorage.getItem('md_nse_watchlist_v3')) || [
-            { symbol: "LT", name: "Larsen & Toubro Ltd", sector: "Infra & Capital Goods", theme: "National Infrastructure", industry: "Engineering & Construction", category: "Large Cap" },
-            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", sector: "Banking & Finance", theme: "Private Banking Core", industry: "Private Sector Bank", category: "Large Cap" },
-            { symbol: "RELIANCE", name: "Reliance Industries Ltd", sector: "Oil, Gas & Energy", theme: "Energy & Telecom Giant", industry: "Refineries & Petrochemicals", category: "Large Cap" },
-            { symbol: "HAL", name: "Hindustan Aeronautics Ltd", sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace & Defense", category: "Large Cap" },
-            { symbol: "BEL", name: "Bharat Electronics Ltd", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense Equipment", category: "Large Cap" },
-            { symbol: "TCS", name: "Tata Consultancy Services", sector: "IT & Digital", theme: "AI & Cloud Services", industry: "IT Consulting", category: "Large Cap" },
-            { symbol: "INFY", name: "Infosys Limited", sector: "IT & Digital", theme: "Digital Transformation", industry: "IT Software", category: "Large Cap" },
-            { symbol: "SBIN", name: "State Bank of India", sector: "Banking & Finance", theme: "PSU Banking Leader", industry: "Public Sector Bank", category: "Large Cap" },
-            { symbol: "NTPC", name: "NTPC Limited", sector: "Power & Renewables", theme: "Green Energy Transition", industry: "Power Generation", category: "Large Cap" },
-            { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Ind", sector: "Pharma & Healthcare", theme: "Specialty Pharma", industry: "Pharmaceuticals", category: "Large Cap" }
+        let WATCHLIST = JSON.parse(localStorage.getItem('md_nse_500_universe_v2')) || [
+            // NIFTY 50 & F&O
+            { symbol: "RELIANCE", name: "Reliance Industries Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Oil, Gas & Energy", theme: "Energy & Telecom", industry: "Refineries" },
+            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank" },
+            { symbol: "ICICIBANK", name: "ICICI Bank Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank" },
+            { symbol: "SBIN", name: "State Bank of India", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "PSU Banking", industry: "Public Bank" },
+            { symbol: "TCS", name: "Tata Consultancy Services", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "AI & Cloud", industry: "IT Consulting" },
+            { symbol: "INFY", name: "Infosys Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "Digital Transformation", industry: "IT Software" },
+            { symbol: "LT", name: "Larsen & Toubro Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "National Infra", industry: "Construction" },
+            { symbol: "BHARTIARTL", name: "Bharti Airtel Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Telecom", theme: "5G & Digital", industry: "Telecom Services" },
+            { symbol: "ITC", name: "ITC Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Rural Consumption", industry: "Diversified FMCG" },
+            { symbol: "TATAMOTORS", name: "Tata Motors Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "Electric Vehicles", industry: "Automobiles" },
+            { symbol: "M&M", name: "Mahindra & Mahindra", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "SUV & Farm Equip", industry: "Automobiles" },
+            { symbol: "MARUTI", name: "Maruti Suzuki India", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "Passenger Vehicles", industry: "Automobiles" },
+            { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Ind", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Pharma & Healthcare", theme: "Specialty Pharma", industry: "Pharmaceuticals" },
+            { symbol: "NTPC", name: "NTPC Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Power & Renewables", theme: "Green Energy", industry: "Power Generation" },
+            { symbol: "BAJFINANCE", name: "Bajaj Finance Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Consumer NBFC", industry: "NBFC" },
+            { symbol: "TRENT", name: "Trent Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Fashion Retail", industry: "Retail" },
+            { symbol: "BEL", name: "Bharat Electronics Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense" },
+
+            // NIFTY NEXT 50 (NIFTY 100) & F&O
+            { symbol: "HAL", name: "Hindustan Aeronautics Ltd", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace" },
+            { symbol: "VBL", name: "Varun Beverages Ltd", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Beverages", industry: "Packaged Foods" },
+            { symbol: "ZOMATO", name: "Zomato Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "Quick Commerce", industry: "E-Commerce" },
+            { symbol: "DLF", name: "DLF Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "Luxury Real Estate", industry: "Realty" },
+            { symbol: "SIEMENS", name: "Siemens Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "Smart Grid", industry: "Heavy Electricals" },
+            { symbol: "PFC", name: "Power Finance Corp", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Power Financing", industry: "PSU NBFC" },
+            { symbol: "CHOLAFIN", name: "Cholamandalam Inv & Fin", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Vehicle Finance", industry: "NBFC" },
+
+            // MIDCAP 150
+            { symbol: "MAZDOCK", name: "Mazagon Dock Shipbuilders", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Defense & Aerospace", theme: "Naval Shipbuilding", industry: "Shipbuilding" },
+            { symbol: "KPITTECH", name: "KPIT Technologies Ltd", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "EV Software", industry: "Engineering R&D" },
+            { symbol: "DIXON", name: "Dixon Technologies", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "Electronics Mfg (EMS)", industry: "Consumer Electronics" },
+            { symbol: "POLYCAB", name: "Polycab India Ltd", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Infra & Capital Goods", theme: "Cables & Wires", industry: "Electricals" },
+            { symbol: "RVNL", name: "Rail Vikas Nigam Ltd", index: "Midcap 150", cap: "Mid Cap", fno: false, sector: "Infra & Capital Goods", theme: "Railway Capex", industry: "Railways" },
+            { symbol: "IRCTC", name: "IRCTC Limited", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "Railway Tourism", industry: "Travel Services" },
+            { symbol: "BSE", name: "BSE Limited", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Banking & Finance", theme: "Capital Markets", industry: "Stock Exchange" },
+            { symbol: "SUZLON", name: "Suzlon Energy Ltd", index: "Midcap 150", cap: "Mid Cap", fno: false, sector: "Power & Renewables", theme: "Wind Energy", industry: "Renewables" },
+
+            // SMALLCAP 250
+            { symbol: "CDSL", name: "Central Depository Services", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Demat & Capital Mkt", industry: "Depository" },
+            { symbol: "ANGELONE", name: "Angel One Limited", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Retail Broking", industry: "Stock Broking" },
+            { symbol: "KEC", name: "KEC International Ltd", index: "Smallcap 250", cap: "Small Cap", fno: false, sector: "Infra & Capital Goods", theme: "Power T&D", industry: "Engineering" },
+            { symbol: "TEJASNET", name: "Tejas Networks Ltd", index: "Smallcap 250", cap: "Small Cap", fno: false, sector: "Telecom", theme: "5G & Optical Gear", industry: "Telecom Equipment" },
+            { symbol: "DATAPATTNS", name: "Data Patterns (India)", index: "Smallcap 250", cap: "Small Cap", fno: false, sector: "Defense & Aerospace", theme: "Defense Radar", industry: "Defense Electronics" }
         ];
 
-        let calculatedRecords = [];
+        // Load cached results instantly for 0-second startup!
+        let calculatedRecords = JSON.parse(localStorage.getItem('md_turbo_cache_records')) || [];
         let filterMode = 'CROSS';
+        let indexFilter = 'ALL';
         let nav = { tf: null, sector: null };
 
-        // Helper: Simple Moving Average from closes array
         function calcSMA(closesArray, length) {
             if (closesArray.length < length) return closesArray[closesArray.length - 1];
-            const slice = closesArray.slice(closesArray.length - length);
-            const sum = slice.reduce((acc, val) => acc + val, 0);
+            let sum = 0;
+            for (let i = closesArray.length - length; i < closesArray.length; i++) {
+                sum += closesArray[i];
+            }
             return sum / length;
         }
 
-        // Fetch 5 Years of Daily Candles (required for Weekly SMA 200 = 1000 trading days!)
-        async function fetchStockHistoryNSE(stockMeta) {
-            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockMeta.symbol}.NS?range=5y&interval=1d`;
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+        // TURBO MULTI-PROXY RACE FETCHER (Whichever proxy responds fastest wins!)
+        async function fetchFastYahooJSON(symbol) {
+            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}.NS?range=5y&interval=1d`;
+            
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`
+            ];
 
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
+            const requests = proxies.map(url => 
+                fetch(url).then(res => {
+                    if (!res.ok) throw new Error('Proxy failed');
+                    return res.json();
+                }).then(json => {
+                    if (!json || !json.chart || !json.chart.result) throw new Error('Invalid JSON');
+                    return json;
+                })
+            );
+
+            return Promise.any(requests);
+        }
+
+        async function fetchStockHistoryNSE(stockMeta) {
+            const data = await fetchFastYahooJSON(stockMeta.symbol);
             const result = data.chart.result[0];
             const timestamps = result.timestamp;
             const quote = result.indicators.quote[0];
@@ -298,17 +375,14 @@
             const todayHigh    = Math.max(latestCandle.high, currentClose);
             const todayLow     = Math.min(latestCandle.low, currentClose);
 
-            // Daily Closes Array
             const dailyCloses = candles.map(c => c.close);
             dailyCloses[dailyCloses.length - 1] = currentClose;
 
-            // Weekly Closes Array (sample every 5 trading days ending on latest)
             let weeklyCloses = [];
             for (let i = dailyCloses.length - 1; i >= 0; i -= 5) {
                 weeklyCloses.unshift(dailyCloses[i]);
             }
 
-            // Compute All 5 Required SMAs
             const smas = {
                 daily20:   calcSMA(dailyCloses, 20),
                 daily50:   calcSMA(dailyCloses, 50),
@@ -317,7 +391,6 @@
                 weekly200: calcSMA(weeklyCloses, 200)
             };
 
-            // Last 40 Daily Candles for Visual Chart
             const chartCandles = candles.slice(-40).map((c, idx, arr) => {
                 if (idx === arr.length - 1) {
                     return { open: c.open, high: todayHigh, low: todayLow, close: currentClose };
@@ -327,8 +400,12 @@
 
             function getCurrentPeriodOHLC(daysCount) {
                 const slice = candles.slice(Math.max(0, candles.length - daysCount));
-                const curHigh  = Math.max(...slice.map(c => c.high), currentClose);
-                const curLow   = Math.min(...slice.map(c => c.low), currentClose);
+                let curHigh = currentClose;
+                let curLow = currentClose;
+                for (let c of slice) {
+                    if (c.high > curHigh) curHigh = c.high;
+                    if (c.low < curLow) curLow = c.low;
+                }
                 return { curHigh, curLow, curClose: currentClose };
             }
 
@@ -386,50 +463,90 @@
             return stockEntries;
         }
 
-        async function fetchAllRealNSEStocks() {
+        // HIGH-SPEED 15-STOCK PARALLEL BURST ENGINE
+        async function fetchAllRealNSEStocks(forceRefresh = false) {
             const statusEl = document.getElementById('sync-status');
-            statusEl.innerText = "🔄 Fetching NSE Closing, Hurdles & 5 SMAs...";
+            const progressEl = document.getElementById('scan-progress');
+            document.getElementById('universe-count-badge').innerText = `${WATCHLIST.length} NSE Stocks`;
             
+            const startTime = performance.now();
             let allResults = [];
-            for (let st of WATCHLIST) {
-                try {
-                    statusEl.innerText = `⏳ Loading Chart & SMAs: ${st.symbol}...`;
-                    const entries = await fetchStockHistoryNSE(st);
-                    allResults.push(...entries);
-                } catch (err) {
-                    console.warn("Error fetching", st.symbol, err);
+            const batchSize = 15; // 15 stocks simultaneously!
+
+            for (let i = 0; i < WATCHLIST.length; i += batchSize) {
+                const batch = WATCHLIST.slice(i, i + batchSize);
+                const pct = Math.round(((i + batch.length) / WATCHLIST.length) * 100);
+                progressEl.style.width = `${pct}%`;
+                statusEl.innerText = `⚡ Turbo Scanning: ${pct}%`;
+                
+                const promises = batch.map(st => fetchStockHistoryNSE(st).catch(() => []));
+                const batchRes = await Promise.all(promises);
+                batchRes.forEach(arr => allResults.push(...arr));
+                
+                if (allResults.length > 0) {
+                    calculatedRecords = allResults;
+                    render();
                 }
             }
 
             if (allResults.length > 0) {
-                calculatedRecords = allResults;
+                localStorage.setItem('md_turbo_cache_records', JSON.stringify(allResults));
+                const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
                 const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-                statusEl.innerHTML = `<span style="color:#10b981;">✅ Live NSE & SMAs Ready (${WATCHLIST.length} Stocks)</span>`;
-                document.getElementById('last-updated-time').innerText = `Updated: ${now}`;
-                render();
+                statusEl.innerHTML = `<span style="color:#10b981;">✅ Done in ${elapsed}s (${WATCHLIST.length} Stocks &bull; ${now})</span>`;
+                setTimeout(() => { progressEl.style.width = '0%'; }, 1200);
             } else {
-                statusEl.innerText = "⚠️ Network busy. Tap 'Refresh NSE' again.";
+                statusEl.innerText = "⚠️ Network busy. Tap 'Turbo Scan' again.";
             }
         }
 
+        // INSTANT SINGLE STOCK SCAN (0.8 seconds!)
         async function addCustomNSESymbol() {
             const input = document.getElementById('new-symbol-input');
             const sym = input.value.trim().toUpperCase().replace('.NS', '');
             if (!sym) return;
 
-            if (!WATCHLIST.some(s => s.symbol === sym)) {
-                WATCHLIST.unshift({
+            const statusEl = document.getElementById('sync-status');
+            statusEl.innerText = `⚡ Instant Scanning ${sym}...`;
+
+            let stockMeta = WATCHLIST.find(s => s.symbol === sym);
+            if (!stockMeta) {
+                stockMeta = {
                     symbol: sym,
-                    name: `${sym} (NSE Equity)`,
-                    sector: "Custom NSE Watchlist",
-                    theme: "Direct NSE Scan",
-                    industry: "NSE Listed",
-                    category: "Equity"
-                });
-                localStorage.setItem('md_nse_watchlist_v3', JSON.stringify(WATCHLIST));
+                    name: `${sym} Ltd`,
+                    index: "NSE 500",
+                    cap: "NSE Listed",
+                    fno: false,
+                    sector: "Custom NSE 500",
+                    theme: "Direct Scan",
+                    industry: "Equity"
+                };
+                WATCHLIST.unshift(stockMeta);
+                localStorage.setItem('md_nse_500_universe_v2', JSON.stringify(WATCHLIST));
             }
+
             input.value = '';
-            await fetchAllRealNSEStocks();
+            try {
+                const entries = await fetchStockHistoryNSE(stockMeta);
+                if (entries.length > 0) {
+                    calculatedRecords = calculatedRecords.filter(r => r.symbol !== sym);
+                    calculatedRecords.unshift(...entries);
+                    localStorage.setItem('md_turbo_cache_records', JSON.stringify(calculatedRecords));
+                    statusEl.innerHTML = `<span style="color:#10b981;">✅ ${sym} Scanned Instantly!</span>`;
+                    render();
+                }
+            } catch (e) {
+                statusEl.innerText = `⚠️ ${sym} not found on NSE.`;
+            }
+        }
+
+        function setIndexFilter(idx) {
+            indexFilter = idx;
+            document.querySelectorAll('.idx-pill').forEach(el => el.classList.remove('active'));
+            document.getElementById('idx-' + idx).classList.add('active');
+            nav.tf = null;
+            nav.sector = null;
+            render();
         }
 
         function setFilter(mode) {
@@ -443,17 +560,36 @@
         function openTF(id) { nav.tf = id; nav.sector = null; render(); }
         function openSec(tf, sec) { nav.tf = tf; nav.sector = sec; render(); }
 
-        function render() {
-            const crossingList = calculatedRecords.filter(r => r.isCrossing);
-            document.getElementById('cnt-cross').innerText = crossingList.length;
-            document.getElementById('cnt-all').innerText = calculatedRecords.length;
+        function applyIndexFilter(records) {
+            if (indexFilter === 'ALL')      return records;
+            if (indexFilter === 'NIFTY50')  return records.filter(r => r.index === 'NIFTY 50');
+            if (indexFilter === 'NIFTY100') return records.filter(r => r.index === 'NIFTY 50' || r.index === 'NIFTY 100');
+            if (indexFilter === 'MIDCAP')   return records.filter(r => r.index === 'Midcap 150');
+            if (indexFilter === 'SMALLCAP') return records.filter(r => r.index === 'Smallcap 250');
+            if (indexFilter === 'FNO')      return records.filter(r => r.fno === true);
+            return records;
+        }
 
-            const activeList = (filterMode === 'CROSS') ? crossingList : calculatedRecords;
-            const container = document.getElementById('main-container');
-            const bc = document.getElementById('breadcrumb');
+        function render() {
+            document.getElementById('c-ALL').innerText      = WATCHLIST.length;
+            document.getElementById('c-NIFTY50').innerText  = WATCHLIST.filter(s => s.index === 'NIFTY 50').length;
+            document.getElementById('c-NIFTY100').innerText = WATCHLIST.filter(s => s.index === 'NIFTY 50' || s.index === 'NIFTY 100').length;
+            document.getElementById('c-MIDCAP').innerText   = WATCHLIST.filter(s => s.index === 'Midcap 150').length;
+            document.getElementById('c-SMALLCAP').innerText = WATCHLIST.filter(s => s.index === 'Smallcap 250').length;
+            document.getElementById('c-FNO').innerText      = WATCHLIST.filter(s => s.fno === true).length;
+
+            const idxFiltered  = applyIndexFilter(calculatedRecords);
+            const crossingList = idxFiltered.filter(r => r.isCrossing);
+
+            document.getElementById('cnt-cross').innerText = crossingList.length;
+            document.getElementById('cnt-all').innerText   = idxFiltered.length;
+
+            const activeList = (filterMode === 'CROSS') ? crossingList : idxFiltered;
+            const container  = document.getElementById('main-container');
+            const bc         = document.getElementById('breadcrumb');
 
             if (!nav.tf) {
-                bc.innerHTML = `<span>📊 Select Timeframe (Current Close &rarr; Next Period)</span>`;
+                bc.innerHTML = `<span>📊 ${indexFilter} Universe &rsaquo; Select Timeframe</span>`;
                 let html = `<div class="tf-grid">`;
                 TIMEFRAMES.forEach(tf => {
                     const list = activeList.filter(s => s.tf === tf.id);
@@ -480,7 +616,7 @@
                             <div class="sector-count-pill">${grouped[sec].length} Stocks &rsaquo;</div>
                         </div>`;
                 });
-                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में कोई स्टॉक क्रॉस नहीं कर रहा है। ऊपर 'All Next Period Levels' देखें।</p>`;
+                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस फ़िल्टर में कोई स्टॉक नहीं है।</p>`;
             } else {
                 const tfObj = TIMEFRAMES.find(t => t.id === nav.tf);
                 bc.innerHTML = `<a onclick="goHome()">All TF</a> &rsaquo; <a onclick="openTF('${nav.tf}')">${tfObj.title}</a> &rsaquo; <span>${nav.sector}</span>`;
@@ -493,9 +629,11 @@
                                 <div>
                                     <div class="stock-sym">NSE: ${st.symbol}</div>
                                     <div style="font-size:0.74rem;color:#94a3b8;">${st.name}</div>
-                                    <span class="status-tag ${st.isCrossing ? 'tag-cross' : 'tag-watch'}">
-                                        ${st.isCrossing ? `⚡ CROSSING ${tfObj.nextLabel.toUpperCase()} ZONE` : `📌 ${tfObj.nextLabel.toUpperCase()} PROJECTION`}
-                                    </span>
+                                    <div class="badges-row">
+                                        <span class="idx-badge">${st.index} (${st.cap})</span>
+                                        ${st.fno ? `<span class="fno-badge">F&O</span>` : `<span class="idx-badge" style="color:#94a3b8;">CASH ONLY</span>`}
+                                        ${st.isCrossing ? `<span class="cross-badge">⚡ ZONE CROSS</span>` : ``}
+                                    </div>
                                 </div>
                                 <div>
                                     <div class="stock-ltp">₹${st.currentClose}</div>
@@ -518,14 +656,13 @@
                                 </div>
                             </div>
 
-                            <!-- NEW VISUAL CHART & 5 SMAs BUTTON -->
                             <button class="chart-btn" onclick="openVisualChart('${st.symbol}', '${st.tf}')">
                                 📈 View Visual Chart (Hurdle, L1/L3 & 5 SMAs)
                             </button>
 
                             <div class="stock-footer-meta">
-                                <b>Category:</b> ${st.category} &bull; <b>Theme:</b> ${st.theme}<br>
-                                <b>Industry:</b> ${st.industry} &bull; <b>Sector:</b> ${st.sector}
+                                <b>Index:</b> ${st.index} &bull; <b>Category:</b> ${st.cap} &bull; <b>Segment:</b> ${st.fno ? 'NSE F&O' : 'Cash'}<br>
+                                <b>Theme:</b> ${st.theme} &bull; <b>Industry:</b> ${st.industry} &bull; <b>Sector:</b> ${st.sector}
                             </div>
                         </div>`;
                 });
@@ -533,18 +670,14 @@
             }
         }
 
-        // =========================================================================
-        // VISUAL CANDLESTICK + HURDLE + L1/L3 + 5 SMAs CHART ENGINE
-        // =========================================================================
         function openVisualChart(symbol, tfId) {
             const st = calculatedRecords.find(r => r.symbol === symbol && r.tf === tfId);
             if (!st) return;
 
             const tfObj = TIMEFRAMES.find(t => t.id === tfId);
-            document.getElementById('modal-stock-title').innerText = `NSE: ${st.symbol} (₹${st.currentClose})`;
-            document.getElementById('modal-stock-sub').innerText = `Daily Candles + ${tfObj.nextLabel} Zone, Hurdle & 5 SMAs`;
+            document.getElementById('modal-stock-title').innerText = `NSE: ${st.symbol} (${st.index} ${st.fno ? '| F&O' : ''})`;
+            document.getElementById('modal-stock-sub').innerText = `Close: ₹${st.currentClose} | ${tfObj.nextLabel} Zone, Hurdle & 5 SMAs`;
 
-            // Populate Exact Price Legend Grid
             const legendItems = [
                 { label: `🚧 ${tfObj.nextLabel} R3 Hurdle`, val: `₹${st.nextCamR3}`, color: '#f43f5e' },
                 { label: `📍 Current Close`, val: `₹${st.currentClose}`, color: '#38bdf8' },
@@ -566,14 +699,12 @@
             `).join('');
 
             document.getElementById('chartModal').style.display = 'flex';
-            drawStockCanvas(st, tfObj);
+            drawStockCanvas(st);
         }
 
-        function closeChartModal() {
-            document.getElementById('chartModal').style.display = 'none';
-        }
+        function closeChartModal() { document.getElementById('chartModal').style.display = 'none'; }
 
-        function drawStockCanvas(st, tfObj) {
+        function drawStockCanvas(st) {
             const canvas = document.getElementById('stockCanvas');
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
@@ -590,7 +721,6 @@
 
             ctx.clearRect(0, 0, W, H);
 
-            // Gather all prices (Candles + Hurdle + L3 + L1 + 5 SMAs) to auto-scale Y-axis cleanly
             const candles = st.chartCandles;
             let allPrices = [
                 st.nextCamR3, st.nextCamL3, st.nextTradL1,
@@ -602,16 +732,11 @@
             const minP = Math.min(...allPrices) * 0.992;
             const maxP = Math.max(...allPrices) * 1.008;
             const priceRange = maxP - minP || 1;
-
             const getY = (price) => padTop + plotH - ((price - minP) / priceRange) * plotH;
 
-            // 1. Shade L3 - L1 Entry Zone Band
-            const yZoneTop = getY(st.nextZoneHigh);
-            const yZoneBot = getY(st.nextZoneLow);
             ctx.fillStyle = 'rgba(16, 185, 129, 0.14)';
-            ctx.fillRect(padLeft, yZoneTop, plotW, Math.max(3, yZoneBot - yZoneTop));
+            ctx.fillRect(padLeft, getY(st.nextZoneHigh), plotW, Math.max(3, getY(st.nextZoneLow) - getY(st.nextZoneHigh)));
 
-            // 2. Draw Daily Candles
             const stepX = plotW / candles.length;
             const candleW = Math.max(3, stepX * 0.62);
 
@@ -621,22 +746,17 @@
                 ctx.strokeStyle = isBull ? '#10b981' : '#ef4444';
                 ctx.fillStyle   = isBull ? '#10b981' : '#ef4444';
 
-                // Wick
                 ctx.beginPath();
                 ctx.moveTo(xCenter, getY(c.high));
                 ctx.lineTo(xCenter, getY(c.low));
                 ctx.lineWidth = 1.2;
                 ctx.stroke();
 
-                // Body
                 const yOpen = getY(c.open);
                 const yClose = getY(c.close);
-                const bodyTop = Math.min(yOpen, yClose);
-                const bodyH = Math.max(2, Math.abs(yClose - yOpen));
-                ctx.fillRect(xCenter - candleW / 2, bodyTop, candleW, bodyH);
+                ctx.fillRect(xCenter - candleW / 2, Math.min(yOpen, yClose), candleW, Math.max(2, Math.abs(yClose - yOpen)));
             });
 
-            // Helper to draw horizontal level line + right-axis price tag
             function drawLevelLine(price, label, color, dashed = false) {
                 const y = getY(price);
                 ctx.save();
@@ -649,7 +769,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Right-side Label Pill
                 ctx.fillStyle = color;
                 ctx.fillRect(padLeft + plotW + 2, y - 8, padRight - 4, 16);
                 ctx.fillStyle = '#090d16';
@@ -657,28 +776,27 @@
                 ctx.fillText(`${label}:${Math.round(price)}`, padLeft + plotW + 5, y + 3);
             }
 
-            // 3. Draw 5 SMA Lines (Dashed)
             drawLevelLine(st.smas.weekly200, 'W200', '#ef4444', true);
             drawLevelLine(st.smas.weekly20,  'W20',  '#fb923c', true);
             drawLevelLine(st.smas.daily200,  'D200', '#f8fafc', true);
             drawLevelLine(st.smas.daily50,   'D50',  '#c084fc', true);
             drawLevelLine(st.smas.daily20,   'D20',  '#60a5fa', true);
 
-            // 4. Draw Next Period Hurdle (R3), Cam L3, Trad L1 (Solid Bold Lines)
             drawLevelLine(st.nextCamR3,  'R3',   '#f43f5e', false);
             drawLevelLine(st.nextCamL3,  'L3',   '#10b981', false);
             drawLevelLine(st.nextTradL1, 'L1',   '#f59e0b', false);
 
-            // 5. Highlight Current Close Marker on latest candle
-            const yCur = getY(st.currentClose);
             ctx.fillStyle = '#38bdf8';
             ctx.beginPath();
-            ctx.arc(padLeft + plotW - stepX / 2, yCur, 4, 0, Math.PI * 2);
+            ctx.arc(padLeft + plotW - stepX / 2, getY(st.currentClose), 4, 0, Math.PI * 2);
             ctx.fill();
         }
 
-        setFilter('CROSS');
-        fetchAllRealNSEStocks();
+        // Instant render from local cache first, then background turbo sync
+        if (calculatedRecords.length > 0) {
+            render();
+        }
+        fetchAllRealNSEStocks(false);
     </script>
 </body>
 </html>
