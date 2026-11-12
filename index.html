@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>MD Period-Wise L3-L1 ज़ोन + R3 हर्डल स्कैनर</title>
+    <title>MD Next Period L3-L1 ज़ोन + R3 हर्डल स्कैनर</title>
     
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Zone%20Hurdle%20Scanner%22%2C%22short_name%22%3A%22MD%20Scanner%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Next%20Period%20Scanner%22%2C%22short_name%22%3A%22MD%20Next%20Zone%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
 
     <style>
         :root {
@@ -18,7 +18,6 @@
             --green: #10b981;
             --amber: #f59e0b;
             --pink: #f43f5e;
-            --purple: #a855f7;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #1e293b;
@@ -36,42 +35,44 @@
         .header-title h1 { font-size: 1.02rem; font-weight: 800; color: var(--cyan); }
         .header-title p { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
 
-        .btn-sm {
-            background: rgba(37, 99, 235, 0.2); border: 1px solid var(--cyan);
-            color: var(--cyan); padding: 6px 10px; border-radius: 8px;
+        .btn-fetch {
+            background: rgba(16, 185, 129, 0.2); border: 1px solid var(--green);
+            color: #34d399; padding: 7px 11px; border-radius: 20px;
             font-size: 0.72rem; font-weight: 700; cursor: pointer;
         }
 
-        /* Mode Switcher: Live vs Full Day Log */
+        .status-bar {
+            padding: 8px 16px; background: #0d1322; border-bottom: 1px solid var(--border);
+            font-size: 0.72rem; color: var(--amber); display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .search-bar {
+            padding: 10px 16px; background: #0b101d; border-bottom: 1px solid var(--border);
+            display: flex; gap: 8px;
+        }
+        .search-bar input {
+            flex: 1; background: #131b2e; border: 1px solid var(--border); color: #fff;
+            padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; text-transform: uppercase;
+        }
+        .search-bar button {
+            background: var(--accent); color: #fff; border: none; padding: 8px 14px;
+            border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+        }
+
         .mode-tabs {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
             padding: 10px 16px; background: #0d1322; border-bottom: 1px solid var(--border);
         }
         .mode-btn {
             background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted);
-            padding: 9px 8px; border-radius: 9px; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-align: center;
+            padding: 9px 8px; border-radius: 9px; font-size: 0.74rem; font-weight: 700; cursor: pointer; text-align: center;
         }
-        .mode-btn.active {
-            background: rgba(16, 185, 129, 0.18); border-color: var(--green); color: #34d399;
-        }
-        .mode-btn.active-eod {
-            background: rgba(168, 85, 247, 0.2); border-color: var(--purple); color: #e9d5ff;
-        }
-
-        .action-bar {
-            padding: 8px 16px; background: #0b101d; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; gap: 6px;
-        }
-
-        .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px 16px; }
-        .summary-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
-        .summary-card span { font-size: 0.72rem; color: var(--text-muted); display: block; }
-        .summary-card strong { font-size: 1.35rem; margin-top: 4px; display: block; }
+        .mode-btn.active { background: rgba(16, 185, 129, 0.18); border-color: var(--green); color: #34d399; }
+        .mode-btn.active-all { background: rgba(56, 189, 248, 0.18); border-color: var(--cyan); color: var(--cyan); }
 
         .breadcrumb {
             padding: 10px 16px; font-size: 0.8rem; background: rgba(37, 99, 235, 0.12);
-            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
         }
         .breadcrumb a { color: var(--cyan); text-decoration: underline; cursor: pointer; font-weight: 600; }
 
@@ -99,14 +100,14 @@
         }
         .stock-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .stock-sym { font-size: 1.08rem; font-weight: 800; color: #fff; }
-        .stock-ltp { font-size: 1.08rem; font-weight: 800; color: var(--cyan); text-align: right; }
+        .stock-ltp { font-size: 1.12rem; font-weight: 800; color: var(--cyan); text-align: right; }
 
         .status-tag {
             display: inline-block; margin-top: 5px; padding: 3px 8px; border-radius: 5px;
             font-size: 0.67rem; font-weight: 700;
         }
-        .tag-live { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .tag-eod  { background: rgba(168, 85, 247, 0.22); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.45); }
+        .tag-cross { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .tag-watch { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
 
         .zone-box {
             background: #090d16; border: 1px solid #1e293b; border-radius: 8px;
@@ -127,226 +128,207 @@
             font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed #283548; padding-top: 8px; line-height: 1.45;
         }
 
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
-            display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px;
-        }
-        .modal-card {
-            background: #131b2e; border: 1px solid var(--cyan); border-radius: 16px;
-            width: 100%; max-width: 430px; padding: 18px; max-height: 90vh; overflow-y: auto;
-        }
-        .input-group { margin-bottom: 10px; }
-        .input-group label { display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
-        .input-group input, .input-group select, .input-group textarea {
-            width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
-            background: #090d16; color: #fff; font-size: 0.82rem;
-        }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .btn-primary {
-            width: 100%; background: var(--accent); color: #fff; border: none;
-            padding: 10px; border-radius: 8px; font-weight: 700; margin-top: 8px; cursor: pointer;
-        }
+        .loader { text-align: center; padding: 30px; color: var(--cyan); font-size: 0.9rem; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-title">
-            <h1>MD L3-L1 ज़ोन + R3 हर्डल</h1>
-            <p>Period-Specific Hurdle & Profit Points (NSE)</p>
+            <h1>MD Next Period ज़ोन + R3 हर्डल</h1>
+            <p>Current Close &rarr; Next Period Cam L3, Trad L1 & R3</p>
         </div>
-        <button class="btn-sm" onclick="openSheetModal()">🔗 Sheet Sync</button>
+        <button class="btn-fetch" onclick="fetchAllRealNSEStocks()">🔄 Refresh NSE</button>
     </header>
 
-    <!-- LIVE vs FULL DAY LOG SWITCHER -->
+    <div class="status-bar">
+        <span id="sync-status">⏳ Fetching actual NSE prices...</span>
+        <span id="last-updated-time"></span>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="new-symbol-input" placeholder="NSE Symbol डालें (जैसे: LT, MARUTI)">
+        <button onclick="addCustomNSESymbol()">+ Scan Stock</button>
+    </div>
+
     <div class="mode-tabs">
-        <div class="mode-btn active" id="mode-LIVE" onclick="setViewMode('LIVE')">⚡ Live Crossing Now (<span id="cnt-live">0</span>)</div>
-        <div class="mode-btn" id="mode-FULLDAY" onclick="setViewMode('FULLDAY')">📋 Full Day / EOD Log (<span id="cnt-fullday">0</span>)</div>
-    </div>
-
-    <div class="action-bar">
-        <button class="btn-sm" style="border-color: var(--green); color: var(--green);" onclick="openAddStockModal()">+ Add / Edit Price</button>
-        <button class="btn-sm" style="border-color: #a855f7; color: #d8b4fe;" onclick="openPasteModal()">📋 Paste Data</button>
-        <button class="btn-sm" style="border-color: var(--amber); color: var(--amber);" onclick="showSectorPopup()">🔔 Summary Pop-up</button>
-    </div>
-
-    <div class="summary-grid">
-        <div class="summary-card">
-            <span id="stat-label-1">Qualified Stocks</span>
-            <strong id="stat-total-stocks" style="color: var(--green);">0</strong>
-        </div>
-        <div class="summary-card">
-            <span>Active Sectors</span>
-            <strong id="stat-total-sectors" style="color: var(--cyan);">0</strong>
-        </div>
+        <div class="mode-btn active" id="mode-CROSS" onclick="setFilter('CROSS')">⚡ Crossing Next Zone (<span id="cnt-cross">0</span>)</div>
+        <div class="mode-btn" id="mode-ALL" onclick="setFilter('ALL')">📊 All Next Period Levels (<span id="cnt-all">0</span>)</div>
     </div>
 
     <div class="breadcrumb" id="breadcrumb"></div>
-    <div class="container" id="main-container"></div>
-
-    <!-- Modal 1: Google Sheet Direct Sync -->
-    <div class="modal-overlay" id="sheetModal">
-        <div class="modal-card">
-            <h3 style="color:var(--cyan); margin-bottom:8px;">🔗 Google Sheet Direct Sync</h3>
-            <p style="font-size:0.74rem; color:var(--text-muted); margin-bottom:10px;">
-                अपनी Google Sheet को <b>"Anyone with the link"</b> पर सेट करें और उसका साधारण <b>Copy link</b> यहाँ पेस्ट करें:
-            </p>
-            <div class="input-group">
-                <label>Google Sheet Share Link</label>
-                <input type="text" id="sheet-url-input" placeholder="https://docs.google.com/spreadsheets/d/1ABC.../edit">
-            </div>
-            <button class="btn-primary" onclick="fetchFromDirectSheetLink()">Sync Live Data Now</button>
-            <button class="btn-primary" style="background:#334155;" onclick="closeModals()">Close</button>
-        </div>
-    </div>
-
-    <!-- Modal 2: Direct Copy-Paste -->
-    <div class="modal-overlay" id="pasteModal">
-        <div class="modal-card">
-            <h3 style="color:#d8b4fe; margin-bottom:8px;">📋 Sheet से सीधे Copy-Paste करें</h3>
-            <p style="font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">
-                क्रम: Symbol, Name, Timeframe, Sector, Theme, Industry, Category, PrevH, PrevL, PrevC, TodayL, TodayH, TodayClose
-            </p>
-            <div class="input-group">
-                <textarea id="paste-area" rows="5" placeholder="HDFCBANK	HDFC Bank	Monthly	Banking	Private	Bank	LargeCap	845	798	826	811	822	816"></textarea>
-            </div>
-            <button class="btn-primary" onclick="processPastedData()">Load Stocks</button>
-            <button class="btn-primary" style="background:#334155;" onclick="closeModals()">Close</button>
-        </div>
-    </div>
-
-    <!-- Modal 3: Add / Edit Stock -->
-    <div class="modal-overlay" id="addStockModal">
-        <div class="modal-card">
-            <h3 style="color:var(--green); margin-bottom:10px;">📊 Actual Price & Period Hurdle</h3>
-            <div class="grid-2">
-                <div class="input-group"><label>NSE Symbol</label><input type="text" id="in-sym" value="HDFCBANK"></div>
-                <div class="input-group">
-                    <label>Timeframe (Period)</label>
-                    <select id="in-tf">
-                        <option value="Daily">Daily (D)</option>
-                        <option value="Weekly">Weekly (W)</option>
-                        <option value="Monthly" selected>Monthly (M)</option>
-                        <option value="Quarterly">Quarterly (3M)</option>
-                        <option value="HalfYearly">Half-Yearly (6M)</option>
-                        <option value="Yearly">Yearly (12M)</option>
-                    </select>
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="input-group"><label>Sector</label><input type="text" id="in-sec" value="Banking & Finance"></div>
-                <div class="input-group"><label>Theme</label><input type="text" id="in-thm" value="Private Banking Core"></div>
-            </div>
-            <div class="grid-2">
-                <div class="input-group"><label>Prev Period High</label><input type="number" id="in-ph" value="845"></div>
-                <div class="input-group"><label>Prev Period Low</label><input type="number" id="in-pl" value="798"></div>
-            </div>
-            <div class="grid-2">
-                <div class="input-group"><label>Prev Period Close</label><input type="number" id="in-pc" value="826"></div>
-                <div class="input-group"><label>Today Close / LTP (₹)</label><input type="number" id="in-ltp" value="816"></div>
-            </div>
-            <div class="grid-2">
-                <div class="input-group"><label>Today Low</label><input type="number" id="in-tl" value="811"></div>
-                <div class="input-group"><label>Today High</label><input type="number" id="in-th" value="822"></div>
-            </div>
-            <button class="btn-primary" onclick="saveManualStock()">Save & Calculate Hurdle</button>
-            <button class="btn-primary" style="background:#334155;" onclick="closeModals()">Cancel</button>
-        </div>
-    </div>
-
-    <!-- Modal 4: Summary Pop-up -->
-    <div class="modal-overlay" id="alertModal">
-        <div class="modal-card">
-            <h3 style="color:var(--cyan); margin-bottom:8px;">📋 Period-Wise Hurdle & Crossover</h3>
-            <p style="font-size:0.74rem; color:var(--text-muted); margin-bottom:10px;">
-                हर टाइमफ्रेम में उसके अपने पीरियड का <b>Next Cam R3 Hurdle</b> और पॉइंट्स गैप:
-            </p>
-            <div id="popup-list" style="max-height: 310px; overflow-y: auto;"></div>
-            <button class="btn-primary" onclick="closeModals()">OK / Close</button>
-        </div>
+    <div class="container" id="main-container">
+        <div class="loader">NSE मार्केट से करंट क्लोजिंग प्राइस और Next Period लेवल्स निकाले जा रहे हैं...</div>
     </div>
 
     <script>
         const TIMEFRAMES = [
-            { id: 'Daily',      title: 'Daily (D)',        periodName: 'Daily',       nextLabel: 'Next Day' },
-            { id: 'Weekly',     title: 'Weekly (W)',       periodName: 'Weekly',      nextLabel: 'Next Week' },
-            { id: 'Monthly',    title: 'Monthly (M)',      periodName: 'Monthly',     nextLabel: 'Next Month' },
-            { id: 'Quarterly',  title: 'Quarterly (3M)',   periodName: 'Quarterly',   nextLabel: 'Next Quarter' },
-            { id: 'HalfYearly', title: 'Half-Yearly (6M)', periodName: 'Half-Yearly', nextLabel: 'Next Half-Year' },
-            { id: 'Yearly',     title: 'Yearly (12M)',     periodName: 'Yearly',      nextLabel: 'Next Year' }
+            { id: 'Daily',      title: 'Daily (D)',        periodName: 'Next Day',       nextLabel: 'Next Day' },
+            { id: 'Weekly',     title: 'Weekly (W)',       periodName: 'Next Week',      nextLabel: 'Next Week' },
+            { id: 'Monthly',    title: 'Monthly (M)',      periodName: 'Next Month',     nextLabel: 'Next Month' },
+            { id: 'Quarterly',  title: 'Quarterly (3M)',   periodName: 'Next Quarter',   nextLabel: 'Next Quarter' },
+            { id: 'HalfYearly', title: 'Half-Yearly (6M)', periodName: 'Next Half-Year', nextLabel: 'Next 6M' },
+            { id: 'Yearly',     title: 'Yearly (12M)',     periodName: 'Next Year',      nextLabel: 'Next Year' }
         ];
 
-        const DEFAULT_STOCKS = [
-            // DAILY
-            { symbol: "BEL", name: "Bharat Electronics Ltd", tf: "Daily", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense", category: "Large Cap", prevH: 296, prevL: 286, prevC: 292, todayLow: 288.5, todayHigh: 293.5, todayClose: 290.2, timeHit: "10:15 AM" },
-            { symbol: "HAL", name: "Hindustan Aeronautics", tf: "Daily", sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace", category: "Large Cap", prevH: 4280, prevL: 4190, prevC: 4240, todayLow: 4210, todayHigh: 4235, todayClose: 4220, timeHit: "02:45 PM" },
-            
-            // WEEKLY
-            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", tf: "Weekly", sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank", category: "Large Cap", prevH: 830, prevL: 806, prevC: 821, todayLow: 812, todayHigh: 819, todayClose: 816, timeHit: "11:30 AM" },
-            { symbol: "RELIANCE", name: "Reliance Industries", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "Energy & Telecom", industry: "Refineries", category: "Large Cap", prevH: 1310, prevL: 1265, prevC: 1292, todayLow: 1276, todayHigh: 1296, todayClose: 1283, timeHit: "01:20 PM" },
-            
-            // MONTHLY
-            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", tf: "Monthly", sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank", category: "Large Cap", prevH: 845, prevL: 798, prevC: 826, todayLow: 811, todayHigh: 820, todayClose: 816, timeHit: "03:10 PM" },
-            { symbol: "SBIN", name: "State Bank of India", tf: "Monthly", sector: "Banking & Finance", theme: "PSU Banking", industry: "Public Bank", category: "Large Cap", prevH: 815, prevL: 775, prevC: 798, todayLow: 785, todayHigh: 804, todayClose: 791, timeHit: "12:05 PM" },
-            
-            // QUARTERLY
-            { symbol: "TCS", name: "Tata Consultancy Services", tf: "Quarterly", sector: "IT & Digital", theme: "AI & Cloud", industry: "IT Software", category: "Large Cap", prevH: 4120, prevL: 3890, prevC: 4030, todayLow: 3955, todayHigh: 3995, todayClose: 3975, timeHit: "02:10 PM" },
-            
-            // HALF-YEARLY
-            { symbol: "LT", name: "Larsen & Toubro Ltd", tf: "HalfYearly", sector: "Infra & Capital Goods", theme: "National Infra", industry: "Construction", category: "Large Cap", prevH: 3680, prevL: 3420, prevC: 3580, todayLow: 3495, todayHigh: 3545, todayClose: 3520, timeHit: "01:45 PM" },
-            
-            // YEARLY
-            { symbol: "NTPC", name: "NTPC Limited", tf: "Yearly", sector: "Power & Renewables", theme: "Green Energy", industry: "Power Gen", category: "Large Cap", prevH: 410, prevL: 345, prevC: 385, todayLow: 362, todayHigh: 376, todayClose: 370, timeHit: "10:50 AM" }
+        let WATCHLIST = JSON.parse(localStorage.getItem('md_nse_watchlist_v2')) || [
+            { symbol: "LT", name: "Larsen & Toubro Ltd", sector: "Infra & Capital Goods", theme: "National Infrastructure", industry: "Engineering & Construction", category: "Large Cap" },
+            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", sector: "Banking & Finance", theme: "Private Banking Core", industry: "Private Sector Bank", category: "Large Cap" },
+            { symbol: "RELIANCE", name: "Reliance Industries Ltd", sector: "Oil, Gas & Energy", theme: "Energy & Telecom Giant", industry: "Refineries & Petrochemicals", category: "Large Cap" },
+            { symbol: "HAL", name: "Hindustan Aeronautics Ltd", sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace & Defense", category: "Large Cap" },
+            { symbol: "BEL", name: "Bharat Electronics Ltd", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense Equipment", category: "Large Cap" },
+            { symbol: "TCS", name: "Tata Consultancy Services", sector: "IT & Digital", theme: "AI & Cloud Services", industry: "IT Consulting", category: "Large Cap" },
+            { symbol: "INFY", name: "Infosys Limited", sector: "IT & Digital", theme: "Digital Transformation", industry: "IT Software", category: "Large Cap" },
+            { symbol: "SBIN", name: "State Bank of India", sector: "Banking & Finance", theme: "PSU Banking Leader", industry: "Public Sector Bank", category: "Large Cap" },
+            { symbol: "NTPC", name: "NTPC Limited", sector: "Power & Renewables", theme: "Green Energy Transition", industry: "Power Generation", category: "Large Cap" },
+            { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Ind", sector: "Pharma & Healthcare", theme: "Specialty Pharma", industry: "Pharmaceuticals", category: "Large Cap" }
         ];
 
-        let saved = JSON.parse(localStorage.getItem('md_nse_stocks_v4'));
-        let stocksDB = (saved && saved.length > 0) ? saved : DEFAULT_STOCKS;
-
-        function calculateLevels(st) {
-            const range = st.prevH - st.prevL;
-            const camL3 = st.prevC - (range * 1.1 / 4);
-            const camR3 = st.prevC + (range * 1.1 / 4);
-            const pp = (st.prevH + st.prevL + st.prevC) / 3;
-            const tradL1 = (2 * pp) - st.prevH;
-
-            const zoneLow  = Math.min(camL3, tradL1);
-            const zoneHigh = Math.max(camL3, tradL1);
-
-            // Period-specific Hurdle Gap from Current Price to Next Period Cam R3
-            const gapPoints = Math.max(0, camR3 - st.todayClose);
-            const gapPct = (gapPoints / st.todayClose) * 100;
-
-            const isLiveNow = (st.todayClose >= zoneLow * 0.995 && st.todayClose <= zoneHigh * 1.015);
-            const crossedFullDay = (st.todayLow <= zoneHigh && st.todayHigh >= zoneLow);
-
-            let nextDayNote = "Inside Zone (Watch Breakout)";
-            if (st.todayClose > zoneHigh) {
-                nextDayNote = "Closed Above Zone (Strong)";
-            } else if (st.todayClose < zoneLow) {
-                nextDayNote = "Tested Zone Today (Support)";
-            }
-
-            return {
-                camL3: camL3.toFixed(2),
-                tradL1: tradL1.toFixed(2),
-                camR3: camR3.toFixed(2),
-                zoneLow: zoneLow.toFixed(2),
-                zoneHigh: zoneHigh.toFixed(2),
-                gapPoints: gapPoints.toFixed(2),
-                gapPct: gapPct.toFixed(2),
-                isLiveNow,
-                crossedFullDay,
-                nextDayNote
-            };
-        }
-
-        let viewMode = 'FULLDAY';
+        let calculatedRecords = [];
+        let filterMode = 'CROSS';
         let nav = { tf: null, sector: null };
 
-        function setViewMode(mode) {
-            viewMode = mode;
-            document.getElementById('mode-LIVE').className = mode === 'LIVE' ? 'mode-btn active' : 'mode-btn';
-            document.getElementById('mode-FULLDAY').className = mode === 'FULLDAY' ? 'mode-btn active-eod' : 'mode-btn';
+        async function fetchStockHistoryNSE(stockMeta) {
+            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockMeta.symbol}.NS?range=2y&interval=1d`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+
+            const response = await fetch(proxyUrl);
+            const data = await response.json();
+            const result = data.chart.result[0];
+            const timestamps = result.timestamp;
+            const quote = result.indicators.quote[0];
+            const meta = result.meta;
+
+            let candles = [];
+            for (let i = 0; i < timestamps.length; i++) {
+                if (quote.high[i] !== null && quote.low[i] !== null && quote.close[i] !== null) {
+                    candles.push({
+                        high: quote.high[i],
+                        low: quote.low[i],
+                        close: quote.close[i]
+                    });
+                }
+            }
+
+            if (candles.length < 255) return [];
+
+            // Latest / Current Closing Price & Today's Candle
+            const latestCandle = candles[candles.length - 1];
+            const currentClose = meta.regularMarketPrice || latestCandle.close;
+            const todayHigh    = Math.max(latestCandle.high, currentClose);
+            const todayLow     = Math.min(latestCandle.low, currentClose);
+
+            // Calculate CURRENT Period OHLC (including today's latest close) to project NEXT PERIOD levels
+            function getCurrentPeriodOHLC(daysCount) {
+                const slice = candles.slice(Math.max(0, candles.length - daysCount));
+                const curHigh  = Math.max(...slice.map(c => c.high), currentClose);
+                const curLow   = Math.min(...slice.map(c => c.low), currentClose);
+                const curClose = currentClose;
+                return { curHigh, curLow, curClose };
+            }
+
+            const currentPeriods = {
+                Daily:      getCurrentPeriodOHLC(1),     // Today's H, L, C -> Next Day Levels
+                Weekly:     getCurrentPeriodOHLC(5),     // Current Week's H, L, C -> Next Week Levels
+                Monthly:    getCurrentPeriodOHLC(21),    // Current Month's H, L, C -> Next Month Levels
+                Quarterly:  getCurrentPeriodOHLC(63),    // Current Quarter's H, L, C -> Next Quarter Levels
+                HalfYearly: getCurrentPeriodOHLC(125),   // Current 6M's H, L, C -> Next 6M Levels
+                Yearly:     getCurrentPeriodOHLC(252)    // Current Year's H, L, C -> Next Year Levels
+            };
+
+            let stockEntries = [];
+            Object.entries(currentPeriods).forEach(([tfId, ohlc]) => {
+                const range = ohlc.curHigh - ohlc.curLow;
+                
+                // NEXT PERIOD Camarilla L3 & R3 (Hurdle)
+                const nextCamL3 = ohlc.curClose - (range * 1.1 / 4);
+                const nextCamR3 = ohlc.curClose + (range * 1.1 / 4);
+                
+                // NEXT PERIOD Traditional Pivot L1 (S1)
+                const nextPP = (ohlc.curHigh + ohlc.curLow + ohlc.curClose) / 3;
+                const nextTradL1 = (2 * nextPP) - ohlc.curHigh;
+
+                const nextZoneLow  = Math.min(nextCamL3, nextTradL1);
+                const nextZoneHigh = Math.max(nextCamL3, nextTradL1);
+
+                // Gap from Current Closing Price to Next Period Cam R3 Hurdle
+                const gapPoints = Math.max(0, nextCamR3 - currentClose);
+                const gapPct = (gapPoints / currentClose) * 100;
+
+                // Check if Today's Candle / Current Close is crossing or touching the Next Period Zone
+                const isCrossingNextZone = (todayLow <= nextZoneHigh && todayHigh >= nextZoneLow) ||
+                                           (Math.abs(currentClose - nextZoneHigh) / currentClose <= 0.015);
+
+                stockEntries.push({
+                    ...stockMeta,
+                    tf: tfId,
+                    currentClose: currentClose.toFixed(2),
+                    todayLow: todayLow.toFixed(2),
+                    todayHigh: todayHigh.toFixed(2),
+                    nextCamL3: nextCamL3.toFixed(2),
+                    nextTradL1: nextTradL1.toFixed(2),
+                    nextCamR3: nextCamR3.toFixed(2),
+                    nextZoneLow: nextZoneLow.toFixed(2),
+                    nextZoneHigh: nextZoneHigh.toFixed(2),
+                    gapPoints: gapPoints.toFixed(2),
+                    gapPct: gapPct.toFixed(2),
+                    isCrossing: isCrossingNextZone
+                });
+            });
+
+            return stockEntries;
+        }
+
+        async function fetchAllRealNSEStocks() {
+            const statusEl = document.getElementById('sync-status');
+            statusEl.innerText = "🔄 Fetching NSE Closing & Next Period Levels...";
+            
+            let allResults = [];
+            for (let st of WATCHLIST) {
+                try {
+                    statusEl.innerText = `⏳ Calculating Next Period: ${st.symbol}...`;
+                    const entries = await fetchStockHistoryNSE(st);
+                    allResults.push(...entries);
+                } catch (err) {
+                    console.warn("Error fetching", st.symbol, err);
+                }
+            }
+
+            if (allResults.length > 0) {
+                calculatedRecords = allResults;
+                const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                statusEl.innerHTML = `<span style="color:#10b981;">✅ Real NSE Closing Synced (${WATCHLIST.length} Stocks)</span>`;
+                document.getElementById('last-updated-time').innerText = `Updated: ${now}`;
+                render();
+            } else {
+                statusEl.innerText = "⚠️ Network busy. Tap 'Refresh NSE' again.";
+            }
+        }
+
+        async function addCustomNSESymbol() {
+            const input = document.getElementById('new-symbol-input');
+            const sym = input.value.trim().toUpperCase().replace('.NS', '');
+            if (!sym) return;
+
+            if (!WATCHLIST.some(s => s.symbol === sym)) {
+                WATCHLIST.unshift({
+                    symbol: sym,
+                    name: `${sym} (NSE Equity)`,
+                    sector: "Custom NSE Watchlist",
+                    theme: "Direct NSE Scan",
+                    industry: "NSE Listed",
+                    category: "Equity"
+                });
+                localStorage.setItem('md_nse_watchlist_v2', JSON.stringify(WATCHLIST));
+            }
+            input.value = '';
+            await fetchAllRealNSEStocks();
+        }
+
+        function setFilter(mode) {
+            filterMode = mode;
+            document.getElementById('mode-CROSS').className = mode === 'CROSS' ? 'mode-btn active' : 'mode-btn';
+            document.getElementById('mode-ALL').className = mode === 'ALL' ? 'mode-btn active-all' : 'mode-btn';
             render();
         }
 
@@ -355,24 +337,16 @@
         function openSec(tf, sec) { nav.tf = tf; nav.sector = sec; render(); }
 
         function render() {
-            const allWithCalc = stocksDB.map(s => ({ ...s, calc: calculateLevels(s) }));
-            const liveList    = allWithCalc.filter(s => s.calc.isLiveNow);
-            const fullDayList = allWithCalc.filter(s => s.calc.crossedFullDay);
+            const crossingList = calculatedRecords.filter(r => r.isCrossing);
+            document.getElementById('cnt-cross').innerText = crossingList.length;
+            document.getElementById('cnt-all').innerText = calculatedRecords.length;
 
-            document.getElementById('cnt-live').innerText = liveList.length;
-            document.getElementById('cnt-fullday').innerText = fullDayList.length;
-
-            const activeList = (viewMode === 'LIVE') ? liveList : fullDayList;
-
-            document.getElementById('stat-total-stocks').innerText = activeList.length;
-            document.getElementById('stat-total-sectors').innerText = new Set(activeList.map(s => `${s.tf}-${s.sector}`)).size;
-
+            const activeList = (filterMode === 'CROSS') ? crossingList : calculatedRecords;
             const container = document.getElementById('main-container');
             const bc = document.getElementById('breadcrumb');
-            const modeTitle = viewMode === 'LIVE' ? '⚡ Live Crossing' : '📋 Full Day Log';
 
             if (!nav.tf) {
-                bc.innerHTML = `<span>${modeTitle} &rsaquo; Select Timeframe</span>`;
+                bc.innerHTML = `<span>📊 Select Timeframe (Current Close &rarr; Next Period)</span>`;
                 let html = `<div class="tf-grid">`;
                 TIMEFRAMES.forEach(tf => {
                     const list = activeList.filter(s => s.tf === tf.id);
@@ -381,13 +355,13 @@
                         <div class="tf-card" onclick="openTF('${tf.id}')">
                             <div class="tf-title">${tf.title} &rarr;</div>
                             <div style="margin-top:6px;"><span class="tf-number">${list.length}</span> <span style="font-size:0.75rem;color:#94a3b8;">Stocks</span></div>
-                            <div style="font-size:0.72rem;color:var(--cyan);margin-top:4px;">${secs} Sectors &bull; ${tf.periodName} Hurdle</div>
+                            <div style="font-size:0.72rem;color:var(--cyan);margin-top:4px;">${secs} Sectors &bull; ${tf.nextLabel} Hurdle</div>
                         </div>`;
                 });
                 container.innerHTML = html + `</div>`;
             } else if (nav.tf && !nav.sector) {
                 const tfObj = TIMEFRAMES.find(t => t.id === nav.tf);
-                bc.innerHTML = `<a onclick="goHome()">${modeTitle}</a> &rsaquo; <span>${tfObj.title}</span>`;
+                bc.innerHTML = `<a onclick="goHome()">All Timeframes</a> &rsaquo; <span>${tfObj.title}</span>`;
                 const list = activeList.filter(s => s.tf === nav.tf);
                 const grouped = {};
                 list.forEach(s => { (grouped[s.sector] = grouped[s.sector] || []).push(s); });
@@ -395,11 +369,11 @@
                 Object.keys(grouped).forEach(sec => {
                     html += `
                         <div class="sector-card" onclick="openSec('${nav.tf}', '${sec}')">
-                            <div><h3>${sec}</h3><p style="font-size:0.74rem;color:#94a3b8;">View ${tfObj.periodName} Hurdle & Points Gap</p></div>
+                            <div><h3>${sec}</h3><p style="font-size:0.74rem;color:#94a3b8;">${tfObj.nextLabel} L3-L1 Zone & Cam R3 Hurdle</p></div>
                             <div class="sector-count-pill">${grouped[sec].length} Stocks &rsaquo;</div>
                         </div>`;
                 });
-                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में कोई स्टॉक नहीं है।</p>`;
+                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में कोई स्टॉक क्रॉस नहीं कर रहा है। ऊपर 'All Next Period Levels' देखें।</p>`;
             } else {
                 const tfObj = TIMEFRAMES.find(t => t.id === nav.tf);
                 bc.innerHTML = `<a onclick="goHome()">All TF</a> &rsaquo; <a onclick="openTF('${nav.tf}')">${tfObj.title}</a> &rsaquo; <span>${nav.sector}</span>`;
@@ -407,33 +381,33 @@
                 let html = ``;
                 list.forEach(st => {
                     html += `
-                        <div class="stock-card" style="border-left-color: ${viewMode === 'LIVE' ? 'var(--green)' : 'var(--purple)'};">
+                        <div class="stock-card" style="border-left-color: ${st.isCrossing ? 'var(--green)' : 'var(--amber)'};">
                             <div class="stock-top">
                                 <div>
                                     <div class="stock-sym">NSE: ${st.symbol}</div>
                                     <div style="font-size:0.74rem;color:#94a3b8;">${st.name}</div>
-                                    <span class="status-tag ${viewMode === 'LIVE' ? 'tag-live' : 'tag-eod'}">
-                                        🕒 ${st.timeHit || 'Today'} &bull; ${st.calc.nextDayNote}
+                                    <span class="status-tag ${st.isCrossing ? 'tag-cross' : 'tag-watch'}">
+                                        ${st.isCrossing ? `⚡ CROSSING ${tfObj.nextLabel.toUpperCase()} ZONE` : `📌 ${tfObj.nextLabel.toUpperCase()} PROJECTION`}
                                     </span>
                                 </div>
                                 <div>
-                                    <div class="stock-ltp">₹${st.todayClose}</div>
-                                    <div style="font-size:0.68rem;color:#94a3b8;">Day L: ₹${st.todayLow} | H: ₹${st.todayHigh}</div>
+                                    <div class="stock-ltp">₹${st.currentClose}</div>
+                                    <div style="font-size:0.68rem;color:#94a3b8;">Current Close (Day L: ₹${st.todayLow} | H: ₹${st.todayHigh})</div>
                                 </div>
                             </div>
                             <div class="zone-box">
-                                <div class="zone-col"><span>${tfObj.nextLabel} Cam L3</span><strong>₹${st.calc.camL3}</strong></div>
-                                <div class="zone-col"><span>${tfObj.nextLabel} Trad L1</span><strong>₹${st.calc.tradL1}</strong></div>
-                                <div class="zone-col"><span>${tfObj.periodName} Zone</span><strong style="color:var(--cyan);">₹${st.calc.zoneLow}-${st.calc.zoneHigh}</strong></div>
+                                <div class="zone-col"><span>${tfObj.nextLabel} Cam L3</span><strong>₹${st.nextCamL3}</strong></div>
+                                <div class="zone-col"><span>${tfObj.nextLabel} Trad L1</span><strong>₹${st.nextTradL1}</strong></div>
+                                <div class="zone-col"><span>${tfObj.nextLabel} Zone</span><strong style="color:var(--cyan);">₹${st.nextZoneLow}-${st.nextZoneHigh}</strong></div>
                             </div>
                             <div class="profit-banner">
                                 <div class="profit-left">
-                                    <span>🎯 ${tfObj.periodName} Hurdle Gap (Points)</span>
-                                    <strong>+₹${st.calc.gapPoints} pts (+${st.calc.gapPct}%)</strong>
+                                    <span>🎯 ${tfObj.nextLabel} Profit Gap (Points)</span>
+                                    <strong>+₹${st.gapPoints} pts (+${st.gapPct}%)</strong>
                                 </div>
                                 <div class="profit-right">
                                     <span>🚧 ${tfObj.nextLabel} Cam R3 Hurdle</span>
-                                    <strong>₹${st.calc.camR3}</strong>
+                                    <strong>₹${st.nextCamR3}</strong>
                                 </div>
                             </div>
                             <div class="stock-footer-meta">
@@ -446,107 +420,8 @@
             }
         }
 
-        function openSheetModal() { document.getElementById('sheetModal').style.display = 'flex'; }
-        function openPasteModal() { document.getElementById('pasteModal').style.display = 'flex'; }
-        function openAddStockModal() { document.getElementById('addStockModal').style.display = 'flex'; }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
-
-        function saveManualStock() {
-            const nowTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-            const item = {
-                symbol: document.getElementById('in-sym').value.toUpperCase(),
-                name: document.getElementById('in-sym').value.toUpperCase() + " Ltd",
-                tf: document.getElementById('in-tf').value,
-                sector: document.getElementById('in-sec').value,
-                theme: document.getElementById('in-thm').value,
-                industry: document.getElementById('in-sec').value,
-                category: "NSE Equity",
-                prevH: parseFloat(document.getElementById('in-ph').value),
-                prevL: parseFloat(document.getElementById('in-pl').value),
-                prevC: parseFloat(document.getElementById('in-pc').value),
-                todayLow: parseFloat(document.getElementById('in-tl').value),
-                todayHigh: parseFloat(document.getElementById('in-th').value),
-                todayClose: parseFloat(document.getElementById('in-ltp').value),
-                timeHit: nowTime
-            };
-            stocksDB = stocksDB.filter(s => !(s.symbol === item.symbol && s.tf === item.tf));
-            stocksDB.unshift(item);
-            localStorage.setItem('md_nse_stocks_v4', JSON.stringify(stocksDB));
-            closeModals();
-            render();
-        }
-
-        function parseRows(text, delimiter) {
-            const rows = text.split('\n');
-            return rows.filter(r => r.trim()).map(r => {
-                const c = r.split(delimiter);
-                return {
-                    symbol: c[0]?.trim(), name: c[1]?.trim() || c[0]?.trim(), tf: c[2]?.trim() || 'Daily',
-                    sector: c[3]?.trim() || 'NSE General', theme: c[4]?.trim() || 'Market',
-                    industry: c[5]?.trim() || 'Equity', category: c[6]?.trim() || 'NSE',
-                    prevH: parseFloat(c[7]), prevL: parseFloat(c[8]), prevC: parseFloat(c[9]),
-                    todayLow: parseFloat(c[10]), todayHigh: parseFloat(c[11]), todayClose: parseFloat(c[12]),
-                    timeHit: "Synced Today"
-                };
-            }).filter(x => x.symbol && x.symbol.toLowerCase() !== 'symbol' && !isNaN(x.todayClose));
-        }
-
-        function processPastedData() {
-            const raw = document.getElementById('paste-area').value.trim();
-            if (!raw) return;
-            const delimiter = raw.includes('\t') ? '\t' : ',';
-            const parsed = parseRows(raw, delimiter);
-            if (parsed.length > 0) {
-                stocksDB = parsed;
-                localStorage.setItem('md_nse_stocks_v4', JSON.stringify(stocksDB));
-                alert(`✅ ${parsed.length} स्टॉक्स लोड हो गए हैं!`);
-                closeModals();
-                render();
-            }
-        }
-
-        async function fetchFromDirectSheetLink() {
-            let url = document.getElementById('sheet-url-input').value.trim();
-            if (!url) return alert("कृपया Google Sheet का लिंक पेस्ट करें।");
-            const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-            if (match && match[1]) {
-                url = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
-            }
-            try {
-                const res = await fetch(url);
-                const text = await res.text();
-                const parsed = parseRows(text, ',');
-                if (parsed.length > 0) {
-                    stocksDB = parsed;
-                    localStorage.setItem('md_nse_stocks_v4', JSON.stringify(stocksDB));
-                    alert(`✅ ${parsed.length} स्टॉक्स सिंक हो गए!`);
-                    closeModals();
-                    render();
-                } else {
-                    alert("कॉलम क्रम (A से M) चेक करें या 'Paste Data' का उपयोग करें।");
-                }
-            } catch (e) {
-                alert("कृपया सुनिश्चित करें कि शीट 'Anyone with the link' पर सेट है।");
-            }
-        }
-
-        function showSectorPopup() {
-            const fullDayList = stocksDB.map(s => ({ ...s, calc: calculateLevels(s) })).filter(s => s.calc.crossedFullDay);
-            let html = '';
-            TIMEFRAMES.forEach(tf => {
-                const list = fullDayList.filter(s => s.tf === tf.id);
-                if (list.length > 0) {
-                    html += `<div style="background:#090d16;padding:10px;border-radius:8px;margin-bottom:8px;border-left:3px solid var(--purple);" onclick="closeModals();openTF('${tf.id}')">
-                        <strong style="color:#fff;">${tf.title}: ${list.length} Stocks</strong>
-                        <div style="font-size:0.74rem;color:#94a3b8;margin-top:3px;">${list.map(x => `${x.symbol} (${tf.nextLabel} R3: ₹${x.calc.camR3} | Gap: +₹${x.calc.gapPoints})`).join('<br>')}</div>
-                    </div>`;
-                }
-            });
-            document.getElementById('popup-list').innerHTML = html;
-            document.getElementById('alertModal').style.display = 'flex';
-        }
-
-        setViewMode('FULLDAY');
+        setFilter('CROSS');
+        fetchAllRealNSEStocks();
     </script>
 </body>
 </html>
