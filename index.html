@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>MD Live L3-L1 ज़ोन + R3 स्कैनर</title>
+    <title>MD Live + Full Day L3-L1 ज़ोन स्कैनर</title>
     
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Live%20Zone%20Scanner%22%2C%22short_name%22%3A%22MD%20Scanner%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
 
@@ -18,6 +18,7 @@
             --green: #10b981;
             --amber: #f59e0b;
             --pink: #f43f5e;
+            --purple: #a855f7;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #1e293b;
@@ -32,7 +33,7 @@
             position: sticky; top: 0; z-index: 100;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .header-title h1 { font-size: 1.05rem; font-weight: 800; color: var(--cyan); }
+        .header-title h1 { font-size: 1.02rem; font-weight: 800; color: var(--cyan); }
         .header-title p { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
 
         .btn-sm {
@@ -41,9 +42,25 @@
             font-size: 0.72rem; font-weight: 700; cursor: pointer;
         }
 
-        .action-bar {
+        /* Mode Switcher: Live vs Full Day Log */
+        .mode-tabs {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
             padding: 10px 16px; background: #0d1322; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;
+        }
+        .mode-btn {
+            background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted);
+            padding: 9px 8px; border-radius: 9px; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-align: center;
+        }
+        .mode-btn.active {
+            background: rgba(16, 185, 129, 0.18); border-color: var(--green); color: #34d399;
+        }
+        .mode-btn.active-eod {
+            background: rgba(168, 85, 247, 0.2); border-color: var(--purple); color: #e9d5ff;
+        }
+
+        .action-bar {
+            padding: 8px 16px; background: #0b101d; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; gap: 6px;
         }
 
         .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px 16px; }
@@ -83,6 +100,13 @@
         .stock-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .stock-sym { font-size: 1.08rem; font-weight: 800; color: #fff; }
         .stock-ltp { font-size: 1.08rem; font-weight: 800; color: var(--cyan); text-align: right; }
+
+        .status-tag {
+            display: inline-block; margin-top: 5px; padding: 3px 8px; border-radius: 5px;
+            font-size: 0.67rem; font-weight: 700;
+        }
+        .tag-live { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .tag-eod  { background: rgba(168, 85, 247, 0.22); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.45); }
 
         .zone-box {
             background: #090d16; border: 1px solid #1e293b; border-radius: 8px;
@@ -128,25 +152,31 @@
 
     <header>
         <div class="header-title">
-            <h1>MD Live L3-L1 ज़ोन स्कैनर</h1>
-            <p>Actual NSE Price &rarr; Zone & Cam R3 Hurdle Gap</p>
+            <h1>MD Live + Full Day ज़ोन स्कैनर</h1>
+            <p>Live & After-Market Next Day Position Planner</p>
         </div>
-        <button class="btn-sm" onclick="openSheetModal()">🔗 Sheet Link Sync</button>
+        <button class="btn-sm" onclick="openSheetModal()">🔗 Sheet Sync</button>
     </header>
 
+    <!-- LIVE vs FULL DAY LOG SWITCHER -->
+    <div class="mode-tabs">
+        <div class="mode-btn active" id="mode-LIVE" onclick="setViewMode('LIVE')">⚡ Live Crossing Now (<span id="cnt-live">0</span>)</div>
+        <div class="mode-btn" id="mode-FULLDAY" onclick="setViewMode('FULLDAY')">📋 Full Day / EOD Log (<span id="cnt-fullday">0</span>)</div>
+    </div>
+
     <div class="action-bar">
-        <button class="btn-sm" style="border-color: var(--green); color: var(--green);" onclick="openAddStockModal()">+ Add Price</button>
+        <button class="btn-sm" style="border-color: var(--green); color: var(--green);" onclick="openAddStockModal()">+ Add / Edit Price</button>
         <button class="btn-sm" style="border-color: #a855f7; color: #d8b4fe;" onclick="openPasteModal()">📋 Paste Data</button>
-        <button class="btn-sm" style="border-color: var(--amber); color: var(--amber);" onclick="showSectorPopup()">🔔 Alert (<span id="popup-badge-count">0</span>)</button>
+        <button class="btn-sm" style="border-color: var(--amber); color: var(--amber);" onclick="showSectorPopup()">🔔 Summary Pop-up</button>
     </div>
 
     <div class="summary-grid">
         <div class="summary-card">
-            <span>Crossing Stocks (Actual Price)</span>
+            <span id="stat-label-1">Today's Total Qualified Stocks</span>
             <strong id="stat-total-stocks" style="color: var(--green);">0</strong>
         </div>
         <div class="summary-card">
-            <span>Active Sectors</span>
+            <span>Active Sectors for Next Day</span>
             <strong id="stat-total-sectors" style="color: var(--cyan);">0</strong>
         </div>
     </div>
@@ -154,15 +184,15 @@
     <div class="breadcrumb" id="breadcrumb"></div>
     <div class="container" id="main-container"></div>
 
-    <!-- Modal 1: Direct Google Sheet Link Sync (Works with normal Share Link!) -->
+    <!-- Modal 1: Google Sheet Direct Sync -->
     <div class="modal-overlay" id="sheetModal">
         <div class="modal-card">
             <h3 style="color:var(--cyan); margin-bottom:8px;">🔗 Google Sheet Direct Sync</h3>
             <p style="font-size:0.74rem; color:var(--text-muted); margin-bottom:10px;">
-                अपनी Google Sheet को <b>"Anyone with the link"</b> पर सेट करें और उसका साधारण <b>Copy link</b> यहाँ पेस्ट करें (यह अपने आप लाइव डेटा उठा लेगा):
+                अपनी Google Sheet को <b>"Anyone with the link"</b> पर सेट करें और उसका साधारण <b>Copy link</b> यहाँ पेस्ट करें:
             </p>
             <div class="input-group">
-                <label>Google Sheet Link (Normal Share URL)</label>
+                <label>Google Sheet Share Link</label>
                 <input type="text" id="sheet-url-input" placeholder="https://docs.google.com/spreadsheets/d/1ABC.../edit">
             </div>
             <button class="btn-primary" onclick="fetchFromDirectSheetLink()">Sync Live Data Now</button>
@@ -170,25 +200,25 @@
         </div>
     </div>
 
-    <!-- Modal 2: Direct Copy-Paste from Sheet -->
+    <!-- Modal 2: Direct Copy-Paste -->
     <div class="modal-overlay" id="pasteModal">
         <div class="modal-card">
             <h3 style="color:#d8b4fe; margin-bottom:8px;">📋 Sheet से सीधे Copy-Paste करें</h3>
             <p style="font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">
-                शीट की Rows कॉपी करके नीचे पेस्ट करें (क्रम: Symbol, Name, Timeframe, Sector, Theme, Industry, Category, PrevH, PrevL, PrevC, TodayL, TodayH, TodayClose):
+                क्रम: Symbol, Name, Timeframe, Sector, Theme, Industry, Category, PrevH, PrevL, PrevC, TodayL, TodayH, TodayClose
             </p>
             <div class="input-group">
-                <textarea id="paste-area" rows="5" placeholder="HDFCBANK	HDFC Bank	Monthly	Banking	Private	Bank	LargeCap	845	798	826	811	820	816"></textarea>
+                <textarea id="paste-area" rows="5" placeholder="HDFCBANK	HDFC Bank	Monthly	Banking	Private	Bank	LargeCap	845	798	826	811	822	816"></textarea>
             </div>
-            <button class="btn-primary" onclick="processPastedData()">Load Pasted Stocks</button>
+            <button class="btn-primary" onclick="processPastedData()">Load Stocks</button>
             <button class="btn-primary" style="background:#334155;" onclick="closeModals()">Close</button>
         </div>
     </div>
 
-    <!-- Modal 3: Add / Edit Single Stock Price -->
+    <!-- Modal 3: Add / Edit Stock -->
     <div class="modal-overlay" id="addStockModal">
         <div class="modal-card">
-            <h3 style="color:var(--green); margin-bottom:10px;">📊 Actual Price & Zone Calculator</h3>
+            <h3 style="color:var(--green); margin-bottom:10px;">📊 Actual Price & Next Day Hurdle</h3>
             <div class="grid-2">
                 <div class="input-group"><label>NSE Symbol</label><input type="text" id="in-sym" value="HDFCBANK"></div>
                 <div class="input-group">
@@ -213,22 +243,25 @@
             </div>
             <div class="grid-2">
                 <div class="input-group"><label>Prev Period Close</label><input type="number" id="in-pc" value="826"></div>
-                <div class="input-group"><label>Today Current LTP (₹)</label><input type="number" id="in-ltp" value="816"></div>
+                <div class="input-group"><label>Today Close / LTP (₹)</label><input type="number" id="in-ltp" value="816"></div>
             </div>
             <div class="grid-2">
                 <div class="input-group"><label>Today Low</label><input type="number" id="in-tl" value="811"></div>
-                <div class="input-group"><label>Today High</label><input type="number" id="in-th" value="820"></div>
+                <div class="input-group"><label>Today High</label><input type="number" id="in-th" value="822"></div>
             </div>
-            <button class="btn-primary" onclick="saveManualStock()">Calculate & Save Stock</button>
+            <button class="btn-primary" onclick="saveManualStock()">Save & Calculate Hurdle</button>
             <button class="btn-primary" style="background:#334155;" onclick="closeModals()">Cancel</button>
         </div>
     </div>
 
-    <!-- Modal 4: Sector Alert Pop-up -->
+    <!-- Modal 4: Summary Pop-up -->
     <div class="modal-overlay" id="alertModal">
         <div class="modal-card">
-            <h3 style="color:var(--cyan); margin-bottom:8px;">⚡ Live Zone Crossover Alert</h3>
-            <div id="popup-list" style="max-height: 300px; overflow-y: auto;"></div>
+            <h3 style="color:var(--cyan); margin-bottom:8px;">📋 Full Day & Live Crossover Report</h3>
+            <p style="font-size:0.74rem; color:var(--text-muted); margin-bottom:10px;">
+                आज पूरे दिन में ज़ोन क्रॉस करने वाले सभी स्टॉक्स और <b>Next Day Cam R3 Hurdle</b> का विवरण:
+            </p>
+            <div id="popup-list" style="max-height: 310px; overflow-y: auto;"></div>
             <button class="btn-primary" onclick="closeModals()">OK / Close</button>
         </div>
     </div>
@@ -243,12 +276,22 @@
             { id: 'Yearly', title: 'Yearly (12M)' }
         ];
 
-        let stocksDB = JSON.parse(localStorage.getItem('md_nse_stocks')) || [
-            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", tf: "Monthly", sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank", category: "Large Cap", prevH: 845, prevL: 798, prevC: 826, todayLow: 811, todayHigh: 820, todayClose: 816 },
-            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", tf: "Weekly", sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank", category: "Large Cap", prevH: 830, prevL: 806, prevC: 821, todayLow: 812, todayHigh: 819, todayClose: 816 },
-            { symbol: "RELIANCE", name: "Reliance Industries", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "Energy & Telecom", industry: "Refineries", category: "Large Cap", prevH: 1310, prevL: 1265, prevC: 1292, todayLow: 1276, todayHigh: 1286, todayClose: 1282 },
-            { symbol: "BEL", name: "Bharat Electronics", tf: "Daily", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense", category: "Large Cap", prevH: 296, prevL: 286, prevC: 292, todayLow: 288.5, todayHigh: 291, todayClose: 290.2 }
+        // Default Pre-loaded Stocks across ALL 6 Timeframes (Full Day + Live)
+        const DEFAULT_STOCKS = [
+            { symbol: "BEL", name: "Bharat Electronics Ltd", tf: "Daily", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense", category: "Large Cap", prevH: 296, prevL: 286, prevC: 292, todayLow: 288.5, todayHigh: 293.5, todayClose: 292.8, timeHit: "10:15 AM" },
+            { symbol: "HAL", name: "Hindustan Aeronautics", tf: "Daily", sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace", category: "Large Cap", prevH: 4280, prevL: 4190, prevC: 4240, todayLow: 4210, todayHigh: 4235, todayClose: 4222, timeHit: "02:45 PM" },
+            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", tf: "Weekly", sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank", category: "Large Cap", prevH: 830, prevL: 806, prevC: 821, todayLow: 812, todayHigh: 819, todayClose: 816, timeHit: "11:30 AM" },
+            { symbol: "RELIANCE", name: "Reliance Industries", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "Energy & Telecom", industry: "Refineries", category: "Large Cap", prevH: 1310, prevL: 1265, prevC: 1292, todayLow: 1276, todayHigh: 1296, todayClose: 1294, timeHit: "01:20 PM" },
+            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", tf: "Monthly", sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank", category: "Large Cap", prevH: 845, prevL: 798, prevC: 826, todayLow: 811, todayHigh: 820, todayClose: 816, timeHit: "03:10 PM" },
+            { symbol: "SBIN", name: "State Bank of India", tf: "Monthly", sector: "Banking & Finance", theme: "PSU Banking", industry: "Public Bank", category: "Large Cap", prevH: 815, prevL: 775, prevC: 798, todayLow: 785, todayHigh: 804, todayClose: 801, timeHit: "12:05 PM" },
+            { symbol: "TCS", name: "Tata Consultancy Services", tf: "Quarterly", sector: "IT & Digital", theme: "AI & Cloud", industry: "IT Software", category: "Large Cap", prevH: 4120, prevL: 3890, prevC: 4030, todayLow: 3955, todayHigh: 3995, todayClose: 3982, timeHit: "02:10 PM" },
+            { symbol: "LT", name: "Larsen & Toubro Ltd", tf: "HalfYearly", sector: "Infra & Capital Goods", theme: "National Infra", industry: "Construction", category: "Large Cap", prevH: 3680, prevL: 3420, prevC: 3580, todayLow: 3495, todayHigh: 3545, todayClose: 3532, timeHit: "01:45 PM" },
+            { symbol: "NTPC", name: "NTPC Limited", tf: "Yearly", sector: "Power & Renewables", theme: "Green Energy", industry: "Power Gen", category: "Large Cap", prevH: 410, prevL: 345, prevC: 385, todayLow: 362, todayHigh: 376, todayClose: 373, timeHit: "10:50 AM" }
         ];
+
+        // Load from storage or reset to DEFAULT_STOCKS if empty
+        let saved = JSON.parse(localStorage.getItem('md_nse_stocks_v3'));
+        let stocksDB = (saved && saved.length > 0) ? saved : DEFAULT_STOCKS;
 
         function calculateLevels(st) {
             const range = st.prevH - st.prevL;
@@ -260,8 +303,22 @@
             const zoneLow  = Math.min(camL3, tradL1);
             const zoneHigh = Math.max(camL3, tradL1);
 
+            // Gap from Current/Closing Price to Next Cam R3 Hurdle
             const gapPoints = Math.max(0, camR3 - st.todayClose);
             const gapPct = (gapPoints / st.todayClose) * 100;
+
+            // Condition 1: Live/Closing price currently inside or just above zone
+            const isLiveNow = (st.todayClose >= zoneLow * 0.995 && st.todayClose <= zoneHigh * 1.015);
+            // Condition 2: Full Day Log (Today's High/Low candle touched/crossed the zone at any point today)
+            const crossedFullDay = (st.todayLow <= zoneHigh && st.todayHigh >= zoneLow);
+
+            // Next Day Actionable Note
+            let nextDayNote = "Inside Zone (Watch Breakout)";
+            if (st.todayClose > zoneHigh) {
+                nextDayNote = "Closed Above Zone (Strong for Next Day)";
+            } else if (st.todayClose < zoneLow) {
+                nextDayNote = "Tested Zone Today (Support Re-test)";
+            }
 
             return {
                 camL3: camL3.toFixed(2),
@@ -271,67 +328,89 @@
                 zoneHigh: zoneHigh.toFixed(2),
                 gapPoints: gapPoints.toFixed(2),
                 gapPct: gapPct.toFixed(2),
-                isCrossing: (st.todayLow <= zoneHigh && st.todayHigh >= zoneLow)
+                isLiveNow,
+                crossedFullDay,
+                nextDayNote
             };
         }
 
+        let viewMode = 'FULLDAY'; // Default to FULLDAY so after-market & live both are always visible!
         let nav = { tf: null, sector: null };
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            document.getElementById('mode-LIVE').className = mode === 'LIVE' ? 'mode-btn active' : 'mode-btn';
+            document.getElementById('mode-FULLDAY').className = mode === 'FULLDAY' ? 'mode-btn active-eod' : 'mode-btn';
+            render();
+        }
+
         function goHome() { nav.tf = null; nav.sector = null; render(); }
         function openTF(id) { nav.tf = id; nav.sector = null; render(); }
         function openSec(tf, sec) { nav.tf = tf; nav.sector = sec; render(); }
 
         function render() {
-            const processed = stocksDB.map(s => ({ ...s, calc: calculateLevels(s) })).filter(s => s.calc.isCrossing);
-            document.getElementById('stat-total-stocks').innerText = processed.length;
-            document.getElementById('stat-total-sectors').innerText = new Set(processed.map(s => `${s.tf}-${s.sector}`)).size;
-            document.getElementById('popup-badge-count').innerText = processed.length;
+            const allWithCalc = stocksDB.map(s => ({ ...s, calc: calculateLevels(s) }));
+            const liveList    = allWithCalc.filter(s => s.calc.isLiveNow);
+            const fullDayList = allWithCalc.filter(s => s.calc.crossedFullDay);
+
+            document.getElementById('cnt-live').innerText = liveList.length;
+            document.getElementById('cnt-fullday').innerText = fullDayList.length;
+
+            const activeList = (viewMode === 'LIVE') ? liveList : fullDayList;
+
+            document.getElementById('stat-total-stocks').innerText = activeList.length;
+            document.getElementById('stat-total-sectors').innerText = new Set(activeList.map(s => `${s.tf}-${s.sector}`)).size;
 
             const container = document.getElementById('main-container');
             const bc = document.getElementById('breadcrumb');
+            const modeTitle = viewMode === 'LIVE' ? '⚡ Live Crossing' : '📋 Full Day / Next Day Prep';
 
             if (!nav.tf) {
-                bc.innerHTML = `<span>📊 All Timeframes (Actual Price Crossovers)</span>`;
+                bc.innerHTML = `<span>${modeTitle} &rsaquo; All Timeframes</span>`;
                 let html = `<div class="tf-grid">`;
                 TIMEFRAMES.forEach(tf => {
-                    const list = processed.filter(s => s.tf === tf.id);
+                    const list = activeList.filter(s => s.tf === tf.id);
                     const secs = new Set(list.map(s => s.sector)).size;
                     html += `
                         <div class="tf-card" onclick="openTF('${tf.id}')">
                             <div class="tf-title">${tf.title} &rarr;</div>
                             <div style="margin-top:6px;"><span class="tf-number">${list.length}</span> <span style="font-size:0.75rem;color:#94a3b8;">Stocks</span></div>
-                            <div style="font-size:0.72rem;color:var(--cyan);margin-top:4px;">${secs} Sectors Active</div>
+                            <div style="font-size:0.72rem;color:var(--cyan);margin-top:4px;">${secs} Sectors</div>
                         </div>`;
                 });
                 container.innerHTML = html + `</div>`;
             } else if (nav.tf && !nav.sector) {
-                bc.innerHTML = `<a onclick="goHome()">All Timeframes</a> &rsaquo; <span>${nav.tf}</span>`;
-                const list = processed.filter(s => s.tf === nav.tf);
+                bc.innerHTML = `<a onclick="goHome()">${modeTitle}</a> &rsaquo; <span>${nav.tf}</span>`;
+                const list = activeList.filter(s => s.tf === nav.tf);
                 const grouped = {};
                 list.forEach(s => { (grouped[s.sector] = grouped[s.sector] || []).push(s); });
                 let html = ``;
                 Object.keys(grouped).forEach(sec => {
                     html += `
                         <div class="sector-card" onclick="openSec('${nav.tf}', '${sec}')">
-                            <div><h3>${sec}</h3><p style="font-size:0.74rem;color:#94a3b8;">Click to view stocks & hurdle gap</p></div>
+                            <div><h3>${sec}</h3><p style="font-size:0.74rem;color:#94a3b8;">Next Day Hurdle & Gap Details</p></div>
                             <div class="sector-count-pill">${grouped[sec].length} Stocks &rsaquo;</div>
                         </div>`;
                 });
-                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में अभी कोई क्रॉसओवर नहीं है।</p>`;
+                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में कोई स्टॉक नहीं है।</p>`;
             } else {
                 bc.innerHTML = `<a onclick="goHome()">All TF</a> &rsaquo; <a onclick="openTF('${nav.tf}')">${nav.tf}</a> &rsaquo; <span>${nav.sector}</span>`;
-                const list = processed.filter(s => s.tf === nav.tf && s.sector === nav.sector);
+                const list = activeList.filter(s => s.tf === nav.tf && s.sector === nav.sector);
                 let html = ``;
                 list.forEach(st => {
                     html += `
-                        <div class="stock-card">
+                        <div class="stock-card" style="border-left-color: ${viewMode === 'LIVE' ? 'var(--green)' : 'var(--purple)'};">
                             <div class="stock-top">
                                 <div>
                                     <div class="stock-sym">NSE: ${st.symbol}</div>
                                     <div style="font-size:0.74rem;color:#94a3b8;">${st.name}</div>
+                                    <span class="status-tag ${viewMode === 'LIVE' ? 'tag-live' : 'tag-eod'}">
+                                        🕒 ${st.timeHit || 'Today'} &bull; ${st.calc.nextDayNote}
+                                    </span>
                                 </div>
                                 <div>
                                     <div class="stock-ltp">₹${st.todayClose}</div>
-                                    <div style="font-size:0.68rem;color:#94a3b8;">Today L: ₹${st.todayLow} | H: ₹${st.todayHigh}</div>
+                                    <div style="font-size:0.68rem;color:#94a3b8;">Day L: ₹${st.todayLow} | H: ₹${st.todayHigh}</div>
                                 </div>
                             </div>
                             <div class="zone-box">
@@ -341,7 +420,7 @@
                             </div>
                             <div class="profit-banner">
                                 <div class="profit-left">
-                                    <span>🎯 Actual Gap to R3 Hurdle (${st.tf})</span>
+                                    <span>🎯 Next Day Potential Gap (${st.tf})</span>
                                     <strong>+₹${st.calc.gapPoints} pts (+${st.calc.gapPct}%)</strong>
                                 </div>
                                 <div class="profit-right">
@@ -365,6 +444,7 @@
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
         function saveManualStock() {
+            const nowTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
             const item = {
                 symbol: document.getElementById('in-sym').value.toUpperCase(),
                 name: document.getElementById('in-sym').value.toUpperCase() + " Ltd",
@@ -378,11 +458,12 @@
                 prevC: parseFloat(document.getElementById('in-pc').value),
                 todayLow: parseFloat(document.getElementById('in-tl').value),
                 todayHigh: parseFloat(document.getElementById('in-th').value),
-                todayClose: parseFloat(document.getElementById('in-ltp').value)
+                todayClose: parseFloat(document.getElementById('in-ltp').value),
+                timeHit: nowTime
             };
             stocksDB = stocksDB.filter(s => !(s.symbol === item.symbol && s.tf === item.tf));
             stocksDB.unshift(item);
-            localStorage.setItem('md_nse_stocks', JSON.stringify(stocksDB));
+            localStorage.setItem('md_nse_stocks_v3', JSON.stringify(stocksDB));
             closeModals();
             render();
         }
@@ -396,7 +477,8 @@
                     sector: c[3]?.trim() || 'NSE General', theme: c[4]?.trim() || 'Market',
                     industry: c[5]?.trim() || 'Equity', category: c[6]?.trim() || 'NSE',
                     prevH: parseFloat(c[7]), prevL: parseFloat(c[8]), prevC: parseFloat(c[9]),
-                    todayLow: parseFloat(c[10]), todayHigh: parseFloat(c[11]), todayClose: parseFloat(c[12])
+                    todayLow: parseFloat(c[10]), todayHigh: parseFloat(c[11]), todayClose: parseFloat(c[12]),
+                    timeHit: "Synced Today"
                 };
             }).filter(x => x.symbol && x.symbol.toLowerCase() !== 'symbol' && !isNaN(x.todayClose));
         }
@@ -408,61 +490,56 @@
             const parsed = parseRows(raw, delimiter);
             if (parsed.length > 0) {
                 stocksDB = parsed;
-                localStorage.setItem('md_nse_stocks', JSON.stringify(stocksDB));
-                alert(`✅ ${parsed.length} स्टॉक्स लोड हो गए हैं!`);
+                localStorage.setItem('md_nse_stocks_v3', JSON.stringify(stocksDB));
+                alert(`✅ ${parsed.length} स्टॉक्स Full Day Log में सेव हो गए हैं!`);
                 closeModals();
                 render();
-            } else {
-                alert("डेटा फॉर्मेट सही नहीं है। कृपया कॉलम्स चेक करें।");
             }
         }
 
         async function fetchFromDirectSheetLink() {
             let url = document.getElementById('sheet-url-input').value.trim();
             if (!url) return alert("कृपया Google Sheet का लिंक पेस्ट करें।");
-
-            // Auto-convert standard Share Link to Direct CSV Export URL
             const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
             if (match && match[1]) {
                 url = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
             }
-
             try {
                 const res = await fetch(url);
                 const text = await res.text();
                 const parsed = parseRows(text, ',');
-
                 if (parsed.length > 0) {
                     stocksDB = parsed;
-                    localStorage.setItem('md_nse_stocks', JSON.stringify(stocksDB));
-                    alert(`✅ ${parsed.length} लाइव स्टॉक्स आपकी शीट से सिंक हो गए!`);
+                    localStorage.setItem('md_nse_stocks_v3', JSON.stringify(stocksDB));
+                    alert(`✅ ${parsed.length} स्टॉक्स सिंक हो गए!`);
                     closeModals();
                     render();
                 } else {
-                    alert("शीट खाली है या कॉलम का क्रम (A से M) मैच नहीं हो रहा है।");
+                    alert("कॉलम क्रम (A से M) चेक करें या 'Paste Data' का उपयोग करें।");
                 }
             } catch (e) {
-                alert("लिंक एक्सेस नहीं हो पाया। कृपया सुनिश्चित करें कि शीट 'Anyone with the link' पर सेट है, या '📋 Paste Data' बटन का उपयोग करें।");
+                alert("कृपया सुनिश्चित करें कि शीट 'Anyone with the link' पर सेट है।");
             }
         }
 
         function showSectorPopup() {
-            const processed = stocksDB.map(s => ({ ...s, calc: calculateLevels(s) })).filter(s => s.calc.isCrossing);
+            const fullDayList = stocksDB.map(s => ({ ...s, calc: calculateLevels(s) })).filter(s => s.calc.crossedFullDay);
             let html = '';
             TIMEFRAMES.forEach(tf => {
-                const list = processed.filter(s => s.tf === tf.id);
+                const list = fullDayList.filter(s => s.tf === tf.id);
                 if (list.length > 0) {
-                    html += `<div style="background:#090d16;padding:10px;border-radius:8px;margin-bottom:8px;border-left:3px solid var(--green);" onclick="closeModals();openTF('${tf.id}')">
-                        <strong style="color:#fff;">${tf.title}: ${list.length} Stocks</strong>
-                        <div style="font-size:0.74rem;color:#94a3b8;">${list.map(x => `${x.symbol} (₹${x.todayClose} &rarr; R3 ₹${x.calc.camR3})`).join(', ')}</div>
+                    html += `<div style="background:#090d16;padding:10px;border-radius:8px;margin-bottom:8px;border-left:3px solid var(--purple);" onclick="closeModals();openTF('${tf.id}')">
+                        <strong style="color:#fff;">${tf.title}: ${list.length} Stocks (Full Day)</strong>
+                        <div style="font-size:0.74rem;color:#94a3b8;margin-top:3px;">${list.map(x => `${x.symbol} (Close ₹${x.todayClose} &rarr; R3 ₹${x.calc.camR3} | Gap +₹${x.calc.gapPoints})`).join('<br>')}</div>
                     </div>`;
                 }
             });
-            document.getElementById('popup-list').innerHTML = html || '<p style="color:#94a3b8;">कोई क्रॉसओवर नहीं।</p>';
+            document.getElementById('popup-list').innerHTML = html;
             document.getElementById('alertModal').style.display = 'flex';
         }
 
-        render();
+        // Set default active button styling
+        setViewMode('FULLDAY');
     </script>
 </body>
 </html>
