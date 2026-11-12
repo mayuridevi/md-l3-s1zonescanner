@@ -28,8 +28,7 @@
 
         header {
             background: linear-gradient(180deg, #131b2e 0%, #090d16 100%);
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border);
+            padding: 14px 16px; border-bottom: 1px solid var(--border);
             position: sticky; top: 0; z-index: 100;
             display: flex; justify-content: space-between; align-items: center;
         }
@@ -44,7 +43,7 @@
 
         .action-bar {
             padding: 10px 16px; background: #0d1322; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+            display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;
         }
 
         .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px 16px; }
@@ -104,7 +103,6 @@
             font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed #283548; padding-top: 8px; line-height: 1.45;
         }
 
-        /* Modals & Inputs */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
             display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px;
@@ -115,9 +113,9 @@
         }
         .input-group { margin-bottom: 10px; }
         .input-group label { display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
-        .input-group input, .input-group select {
+        .input-group input, .input-group select, .input-group textarea {
             width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
-            background: #090d16; color: #fff; font-size: 0.85rem;
+            background: #090d16; color: #fff; font-size: 0.82rem;
         }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .btn-primary {
@@ -133,11 +131,12 @@
             <h1>MD Live L3-L1 ज़ोन स्कैनर</h1>
             <p>Actual NSE Price &rarr; Zone & Cam R3 Hurdle Gap</p>
         </div>
-        <button class="btn-sm" onclick="openSheetModal()">🔗 Live Sheet Sync</button>
+        <button class="btn-sm" onclick="openSheetModal()">🔗 Sheet Link Sync</button>
     </header>
 
     <div class="action-bar">
-        <button class="btn-sm" style="border-color: var(--green); color: var(--green);" onclick="openAddStockModal()">+ Actual Price Add/Edit</button>
+        <button class="btn-sm" style="border-color: var(--green); color: var(--green);" onclick="openAddStockModal()">+ Add Price</button>
+        <button class="btn-sm" style="border-color: #a855f7; color: #d8b4fe;" onclick="openPasteModal()">📋 Paste Data</button>
         <button class="btn-sm" style="border-color: var(--amber); color: var(--amber);" onclick="showSectorPopup()">🔔 Alert (<span id="popup-badge-count">0</span>)</button>
     </div>
 
@@ -155,31 +154,43 @@
     <div class="breadcrumb" id="breadcrumb"></div>
     <div class="container" id="main-container"></div>
 
-    <!-- Modal 1: Google Sheet Live CSV Sync -->
+    <!-- Modal 1: Direct Google Sheet Link Sync (Works with normal Share Link!) -->
     <div class="modal-overlay" id="sheetModal">
         <div class="modal-card">
-            <h3 style="color:var(--cyan); margin-bottom:8px;">🔗 Google Sheet Live NSE Sync</h3>
+            <h3 style="color:var(--cyan); margin-bottom:8px;">🔗 Google Sheet Direct Sync</h3>
             <p style="font-size:0.74rem; color:var(--text-muted); margin-bottom:10px;">
-                Google Sheet में <code>=GOOGLEFINANCE("NSE:HDFCBANK","price")</code> लगाकर <b>File &rarr; Share &rarr; Publish to web (CSV)</b> का लिंक यहाँ पेस्ट करें:
+                अपनी Google Sheet को <b>"Anyone with the link"</b> पर सेट करें और उसका साधारण <b>Copy link</b> यहाँ पेस्ट करें (यह अपने आप लाइव डेटा उठा लेगा):
             </p>
             <div class="input-group">
-                <label>Published Google Sheet CSV URL</label>
-                <input type="text" id="sheet-url-input" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+                <label>Google Sheet Link (Normal Share URL)</label>
+                <input type="text" id="sheet-url-input" placeholder="https://docs.google.com/spreadsheets/d/1ABC.../edit">
             </div>
-            <button class="btn-primary" onclick="fetchFromGoogleSheet()">Sync Live NSE Data Now</button>
+            <button class="btn-primary" onclick="fetchFromDirectSheetLink()">Sync Live Data Now</button>
             <button class="btn-primary" style="background:#334155;" onclick="closeModals()">Close</button>
         </div>
     </div>
 
-    <!-- Modal 2: Add / Edit Actual Stock Price -->
+    <!-- Modal 2: Direct Copy-Paste from Sheet -->
+    <div class="modal-overlay" id="pasteModal">
+        <div class="modal-card">
+            <h3 style="color:#d8b4fe; margin-bottom:8px;">📋 Sheet से सीधे Copy-Paste करें</h3>
+            <p style="font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">
+                शीट की Rows कॉपी करके नीचे पेस्ट करें (क्रम: Symbol, Name, Timeframe, Sector, Theme, Industry, Category, PrevH, PrevL, PrevC, TodayL, TodayH, TodayClose):
+            </p>
+            <div class="input-group">
+                <textarea id="paste-area" rows="5" placeholder="HDFCBANK	HDFC Bank	Monthly	Banking	Private	Bank	LargeCap	845	798	826	811	820	816"></textarea>
+            </div>
+            <button class="btn-primary" onclick="processPastedData()">Load Pasted Stocks</button>
+            <button class="btn-primary" style="background:#334155;" onclick="closeModals()">Close</button>
+        </div>
+    </div>
+
+    <!-- Modal 3: Add / Edit Single Stock Price -->
     <div class="modal-overlay" id="addStockModal">
         <div class="modal-card">
             <h3 style="color:var(--green); margin-bottom:10px;">📊 Actual Price & Zone Calculator</h3>
             <div class="grid-2">
-                <div class="input-group">
-                    <label>NSE Symbol</label>
-                    <input type="text" id="in-sym" value="HDFCBANK">
-                </div>
+                <div class="input-group"><label>NSE Symbol</label><input type="text" id="in-sym" value="HDFCBANK"></div>
                 <div class="input-group">
                     <label>Timeframe</label>
                     <select id="in-tf">
@@ -213,7 +224,7 @@
         </div>
     </div>
 
-    <!-- Modal 3: Sector Alert Pop-up -->
+    <!-- Modal 4: Sector Alert Pop-up -->
     <div class="modal-overlay" id="alertModal">
         <div class="modal-card">
             <h3 style="color:var(--cyan); margin-bottom:8px;">⚡ Live Zone Crossover Alert</h3>
@@ -232,27 +243,23 @@
             { id: 'Yearly', title: 'Yearly (12M)' }
         ];
 
-        // Default Stocks calibrated with Realistic Current NSE Prices (e.g., HDFCBANK ~ ₹816)
         let stocksDB = JSON.parse(localStorage.getItem('md_nse_stocks')) || [
             { symbol: "HDFCBANK", name: "HDFC Bank Ltd", tf: "Monthly", sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank", category: "Large Cap", prevH: 845, prevL: 798, prevC: 826, todayLow: 811, todayHigh: 820, todayClose: 816 },
             { symbol: "HDFCBANK", name: "HDFC Bank Ltd", tf: "Weekly", sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank", category: "Large Cap", prevH: 830, prevL: 806, prevC: 821, todayLow: 812, todayHigh: 819, todayClose: 816 },
             { symbol: "RELIANCE", name: "Reliance Industries", tf: "Weekly", sector: "Oil, Gas & Energy", theme: "Energy & Telecom", industry: "Refineries", category: "Large Cap", prevH: 1310, prevL: 1265, prevC: 1292, todayLow: 1276, todayHigh: 1286, todayClose: 1282 },
-            { symbol: "BEL", name: "Bharat Electronics", tf: "Daily", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense", category: "Large Cap", prevH: 296, prevL: 286, prevC: 292, todayLow: 288.5, todayHigh: 291, todayClose: 290.2 },
-            { symbol: "TCS", name: "Tata Consultancy Services", tf: "Quarterly", sector: "IT & Digital", theme: "AI & Cloud", industry: "IT Software", category: "Large Cap", prevH: 4120, prevL: 3890, prevC: 4030, todayLow: 3955, todayHigh: 3995, todayClose: 3982 }
+            { symbol: "BEL", name: "Bharat Electronics", tf: "Daily", sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense", category: "Large Cap", prevH: 296, prevL: 286, prevC: 292, todayLow: 288.5, todayHigh: 291, todayClose: 290.2 }
         ];
 
-        // Pine Script Exact Formula from Current/Previous Period OHLC
         function calculateLevels(st) {
             const range = st.prevH - st.prevL;
             const camL3 = st.prevC - (range * 1.1 / 4);
-            const camR3 = st.prevC + (range * 1.1 / 4); // Hurdle Zone
+            const camR3 = st.prevC + (range * 1.1 / 4);
             const pp = (st.prevH + st.prevL + st.prevC) / 3;
             const tradL1 = (2 * pp) - st.prevH;
 
             const zoneLow  = Math.min(camL3, tradL1);
             const zoneHigh = Math.max(camL3, tradL1);
 
-            // Gap from Actual Current Price (todayClose) to Next Cam R3 Hurdle
             const gapPoints = Math.max(0, camR3 - st.todayClose);
             const gapPct = (gapPoints / st.todayClose) * 100;
 
@@ -269,7 +276,6 @@
         }
 
         let nav = { tf: null, sector: null };
-
         function goHome() { nav.tf = null; nav.sector = null; render(); }
         function openTF(id) { nav.tf = id; nav.sector = null; render(); }
         function openSec(tf, sec) { nav.tf = tf; nav.sector = sec; render(); }
@@ -310,7 +316,7 @@
                             <div class="sector-count-pill">${grouped[sec].length} Stocks &rsaquo;</div>
                         </div>`;
                 });
-                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में अभी कोई क्रॉसओवर नहीं है। ऊपर '+ Actual Price Add' से जोड़ें।</p>`;
+                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में अभी कोई क्रॉसओवर नहीं है।</p>`;
             } else {
                 bc.innerHTML = `<a onclick="goHome()">All TF</a> &rsaquo; <a onclick="openTF('${nav.tf}')">${nav.tf}</a> &rsaquo; <span>${nav.sector}</span>`;
                 const list = processed.filter(s => s.tf === nav.tf && s.sector === nav.sector);
@@ -354,6 +360,7 @@
         }
 
         function openSheetModal() { document.getElementById('sheetModal').style.display = 'flex'; }
+        function openPasteModal() { document.getElementById('pasteModal').style.display = 'flex'; }
         function openAddStockModal() { document.getElementById('addStockModal').style.display = 'flex'; }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
@@ -380,32 +387,62 @@
             render();
         }
 
-        async function fetchFromGoogleSheet() {
-            const url = document.getElementById('sheet-url-input').value.trim();
-            if (!url) return alert("कृपया Google Sheet का CSV लिंक पेस्ट करें।");
+        function parseRows(text, delimiter) {
+            const rows = text.split('\n');
+            return rows.filter(r => r.trim()).map(r => {
+                const c = r.split(delimiter);
+                return {
+                    symbol: c[0]?.trim(), name: c[1]?.trim() || c[0]?.trim(), tf: c[2]?.trim() || 'Daily',
+                    sector: c[3]?.trim() || 'NSE General', theme: c[4]?.trim() || 'Market',
+                    industry: c[5]?.trim() || 'Equity', category: c[6]?.trim() || 'NSE',
+                    prevH: parseFloat(c[7]), prevL: parseFloat(c[8]), prevC: parseFloat(c[9]),
+                    todayLow: parseFloat(c[10]), todayHigh: parseFloat(c[11]), todayClose: parseFloat(c[12])
+                };
+            }).filter(x => x.symbol && x.symbol.toLowerCase() !== 'symbol' && !isNaN(x.todayClose));
+        }
+
+        function processPastedData() {
+            const raw = document.getElementById('paste-area').value.trim();
+            if (!raw) return;
+            const delimiter = raw.includes('\t') ? '\t' : ',';
+            const parsed = parseRows(raw, delimiter);
+            if (parsed.length > 0) {
+                stocksDB = parsed;
+                localStorage.setItem('md_nse_stocks', JSON.stringify(stocksDB));
+                alert(`✅ ${parsed.length} स्टॉक्स लोड हो गए हैं!`);
+                closeModals();
+                render();
+            } else {
+                alert("डेटा फॉर्मेट सही नहीं है। कृपया कॉलम्स चेक करें।");
+            }
+        }
+
+        async function fetchFromDirectSheetLink() {
+            let url = document.getElementById('sheet-url-input').value.trim();
+            if (!url) return alert("कृपया Google Sheet का लिंक पेस्ट करें।");
+
+            // Auto-convert standard Share Link to Direct CSV Export URL
+            const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (match && match[1]) {
+                url = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
+            }
+
             try {
                 const res = await fetch(url);
                 const text = await res.text();
-                const rows = text.split('\n').slice(1);
-                const parsed = rows.filter(r => r.trim()).map(r => {
-                    const c = r.split(',');
-                    return {
-                        symbol: c[0]?.trim(), name: c[1]?.trim(), tf: c[2]?.trim(),
-                        sector: c[3]?.trim(), theme: c[4]?.trim(), industry: c[5]?.trim(), category: c[6]?.trim(),
-                        prevH: parseFloat(c[7]), prevL: parseFloat(c[8]), prevC: parseFloat(c[9]),
-                        todayLow: parseFloat(c[10]), todayHigh: parseFloat(c[11]), todayClose: parseFloat(c[12])
-                    };
-                }).filter(x => x.symbol && !isNaN(x.todayClose));
+                const parsed = parseRows(text, ',');
 
                 if (parsed.length > 0) {
                     stocksDB = parsed;
                     localStorage.setItem('md_nse_stocks', JSON.stringify(stocksDB));
-                    alert(`✅ ${parsed.length} लाइव NSE स्टॉक्स सिंक हो गए हैं!`);
+                    alert(`✅ ${parsed.length} लाइव स्टॉक्स आपकी शीट से सिंक हो गए!`);
                     closeModals();
                     render();
+                } else {
+                    alert("शीट खाली है या कॉलम का क्रम (A से M) मैच नहीं हो रहा है।");
                 }
             } catch (e) {
-                alert("डेटा लोड करने में त्रुटि हुई। कृपया सुनिश्चित करें कि शीट 'Publish to web (CSV)' है।");
+                alert("लिंक एक्सेस नहीं हो पाया। कृपया सुनिश्चित करें कि शीट 'Anyone with the link' पर सेट है, या '📋 Paste Data' बटन का उपयोग करें।");
             }
         }
 
