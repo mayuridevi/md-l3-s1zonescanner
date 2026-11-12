@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>MD Next Period L3-L1 ज़ोन + R3 हर्डल स्कैनर</title>
+    <title>MD Next Period ज़ोन + R3 & SMA चार्ट स्कैनर</title>
     
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Next%20Period%20Scanner%22%2C%22short_name%22%3A%22MD%20Next%20Zone%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Next%20Period%20Chart%20Scanner%22%2C%22short_name%22%3A%22MD%20Chart%20Zone%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
 
     <style>
         :root {
@@ -18,6 +18,7 @@
             --green: #10b981;
             --amber: #f59e0b;
             --pink: #f43f5e;
+            --purple: #a855f7;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #1e293b;
@@ -124,25 +125,73 @@
         .profit-right { text-align: right; }
         .profit-right strong { font-size: 0.92rem; color: var(--pink); font-weight: 800; display: block; }
 
+        /* Chart Button Column/Action */
+        .chart-btn {
+            width: 100%; background: linear-gradient(90deg, #1d4ed8, #2563eb);
+            color: #fff; border: 1px solid #60a5fa; padding: 9px 12px;
+            border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+            cursor: pointer; margin-bottom: 10px; display: flex;
+            justify-content: center; align-items: center; gap: 6px;
+        }
+        .chart-btn:active { transform: scale(0.98); }
+
         .stock-footer-meta {
             font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed #283548; padding-top: 8px; line-height: 1.45;
         }
 
         .loader { text-align: center; padding: 30px; color: var(--cyan); font-size: 0.9rem; font-weight: 600; }
+
+        /* FULL CHART MODAL */
+        .chart-modal {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center;
+            z-index: 999; padding: 10px;
+        }
+        .chart-modal-card {
+            background: #0f172a; border: 1px solid var(--cyan); border-radius: 14px;
+            width: 100%; max-width: 520px; padding: 14px; max-height: 94vh; overflow-y: auto;
+        }
+        .chart-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px;
+        }
+        .chart-header h3 { font-size: 1rem; color: #fff; }
+        .close-chart {
+            background: #1e293b; border: none; color: #fff; width: 30px; height: 30px;
+            border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+        }
+        .canvas-wrap {
+            background: #060911; border: 1px solid #1e293b; border-radius: 10px;
+            padding: 4px; margin-bottom: 10px; position: relative;
+        }
+        canvas { width: 100%; height: 290px; display: block; }
+
+        /* SMA & Levels Legend Grid */
+        .levels-legend {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
+            font-size: 0.72rem;
+        }
+        .legend-item {
+            background: #131b2e; padding: 6px 8px; border-radius: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-left: 3px solid #fff;
+        }
+        .legend-item span { color: #cbd5e1; }
+        .legend-item strong { color: #fff; font-size: 0.78rem; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-title">
-            <h1>MD Next Period ज़ोन + R3 हर्डल</h1>
-            <p>Current Close &rarr; Next Period Cam L3, Trad L1 & R3</p>
+            <h1>MD Next Period ज़ोन + SMA चार्ट</h1>
+            <p>Current Close &rarr; Next Period L3/L1, R3 & All SMAs</p>
         </div>
         <button class="btn-fetch" onclick="fetchAllRealNSEStocks()">🔄 Refresh NSE</button>
     </header>
 
     <div class="status-bar">
-        <span id="sync-status">⏳ Fetching actual NSE prices...</span>
+        <span id="sync-status">⏳ Fetching actual NSE prices & SMAs...</span>
         <span id="last-updated-time"></span>
     </div>
 
@@ -158,7 +207,29 @@
 
     <div class="breadcrumb" id="breadcrumb"></div>
     <div class="container" id="main-container">
-        <div class="loader">NSE मार्केट से करंट क्लोजिंग प्राइस और Next Period लेवल्स निकाले जा रहे हैं...</div>
+        <div class="loader">NSE मार्केट से असली प्राइस, Next Period लेवल्स और 5 SMAs लोड हो रहे हैं...</div>
+    </div>
+
+    <!-- VISUAL CHART & SMA POP-UP MODAL -->
+    <div class="chart-modal" id="chartModal">
+        <div class="chart-modal-card">
+            <div class="chart-header">
+                <div>
+                    <h3 id="modal-stock-title">NSE: STOCK</h3>
+                    <span id="modal-stock-sub" style="font-size:0.72rem; color:#38bdf8;">Daily Candle + Next Period Zone & SMAs</span>
+                </div>
+                <button class="close-chart" onclick="closeChartModal()">&times;</button>
+            </div>
+
+            <div class="canvas-wrap">
+                <canvas id="stockCanvas"></canvas>
+            </div>
+
+            <div style="font-size:0.74rem; font-weight:700; color:#94a3b8; margin-bottom:6px;">
+                📍 Exact Line Positions (Today's Candle vs Levels & SMAs):
+            </div>
+            <div class="levels-legend" id="modal-levels-grid"></div>
+        </div>
     </div>
 
     <script>
@@ -171,7 +242,7 @@
             { id: 'Yearly',     title: 'Yearly (12M)',     periodName: 'Next Year',      nextLabel: 'Next Year' }
         ];
 
-        let WATCHLIST = JSON.parse(localStorage.getItem('md_nse_watchlist_v2')) || [
+        let WATCHLIST = JSON.parse(localStorage.getItem('md_nse_watchlist_v3')) || [
             { symbol: "LT", name: "Larsen & Toubro Ltd", sector: "Infra & Capital Goods", theme: "National Infrastructure", industry: "Engineering & Construction", category: "Large Cap" },
             { symbol: "HDFCBANK", name: "HDFC Bank Ltd", sector: "Banking & Finance", theme: "Private Banking Core", industry: "Private Sector Bank", category: "Large Cap" },
             { symbol: "RELIANCE", name: "Reliance Industries Ltd", sector: "Oil, Gas & Energy", theme: "Energy & Telecom Giant", industry: "Refineries & Petrochemicals", category: "Large Cap" },
@@ -188,8 +259,17 @@
         let filterMode = 'CROSS';
         let nav = { tf: null, sector: null };
 
+        // Helper: Simple Moving Average from closes array
+        function calcSMA(closesArray, length) {
+            if (closesArray.length < length) return closesArray[closesArray.length - 1];
+            const slice = closesArray.slice(closesArray.length - length);
+            const sum = slice.reduce((acc, val) => acc + val, 0);
+            return sum / length;
+        }
+
+        // Fetch 5 Years of Daily Candles (required for Weekly SMA 200 = 1000 trading days!)
         async function fetchStockHistoryNSE(stockMeta) {
-            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockMeta.symbol}.NS?range=2y&interval=1d`;
+            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockMeta.symbol}.NS?range=5y&interval=1d`;
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
 
             const response = await fetch(proxyUrl);
@@ -201,8 +281,9 @@
 
             let candles = [];
             for (let i = 0; i < timestamps.length; i++) {
-                if (quote.high[i] !== null && quote.low[i] !== null && quote.close[i] !== null) {
+                if (quote.open[i] !== null && quote.high[i] !== null && quote.low[i] !== null && quote.close[i] !== null) {
                     candles.push({
+                        open: quote.open[i],
                         high: quote.high[i],
                         low: quote.low[i],
                         close: quote.close[i]
@@ -212,67 +293,93 @@
 
             if (candles.length < 255) return [];
 
-            // Latest / Current Closing Price & Today's Candle
             const latestCandle = candles[candles.length - 1];
             const currentClose = meta.regularMarketPrice || latestCandle.close;
             const todayHigh    = Math.max(latestCandle.high, currentClose);
             const todayLow     = Math.min(latestCandle.low, currentClose);
 
-            // Calculate CURRENT Period OHLC (including today's latest close) to project NEXT PERIOD levels
+            // Daily Closes Array
+            const dailyCloses = candles.map(c => c.close);
+            dailyCloses[dailyCloses.length - 1] = currentClose;
+
+            // Weekly Closes Array (sample every 5 trading days ending on latest)
+            let weeklyCloses = [];
+            for (let i = dailyCloses.length - 1; i >= 0; i -= 5) {
+                weeklyCloses.unshift(dailyCloses[i]);
+            }
+
+            // Compute All 5 Required SMAs
+            const smas = {
+                daily20:   calcSMA(dailyCloses, 20),
+                daily50:   calcSMA(dailyCloses, 50),
+                daily200:  calcSMA(dailyCloses, 200),
+                weekly20:  calcSMA(weeklyCloses, 20),
+                weekly200: calcSMA(weeklyCloses, 200)
+            };
+
+            // Last 40 Daily Candles for Visual Chart
+            const chartCandles = candles.slice(-40).map((c, idx, arr) => {
+                if (idx === arr.length - 1) {
+                    return { open: c.open, high: todayHigh, low: todayLow, close: currentClose };
+                }
+                return c;
+            });
+
             function getCurrentPeriodOHLC(daysCount) {
                 const slice = candles.slice(Math.max(0, candles.length - daysCount));
                 const curHigh  = Math.max(...slice.map(c => c.high), currentClose);
                 const curLow   = Math.min(...slice.map(c => c.low), currentClose);
-                const curClose = currentClose;
-                return { curHigh, curLow, curClose };
+                return { curHigh, curLow, curClose: currentClose };
             }
 
             const currentPeriods = {
-                Daily:      getCurrentPeriodOHLC(1),     // Today's H, L, C -> Next Day Levels
-                Weekly:     getCurrentPeriodOHLC(5),     // Current Week's H, L, C -> Next Week Levels
-                Monthly:    getCurrentPeriodOHLC(21),    // Current Month's H, L, C -> Next Month Levels
-                Quarterly:  getCurrentPeriodOHLC(63),    // Current Quarter's H, L, C -> Next Quarter Levels
-                HalfYearly: getCurrentPeriodOHLC(125),   // Current 6M's H, L, C -> Next 6M Levels
-                Yearly:     getCurrentPeriodOHLC(252)    // Current Year's H, L, C -> Next Year Levels
+                Daily:      getCurrentPeriodOHLC(1),
+                Weekly:     getCurrentPeriodOHLC(5),
+                Monthly:    getCurrentPeriodOHLC(21),
+                Quarterly:  getCurrentPeriodOHLC(63),
+                HalfYearly: getCurrentPeriodOHLC(125),
+                Yearly:     getCurrentPeriodOHLC(252)
             };
 
             let stockEntries = [];
             Object.entries(currentPeriods).forEach(([tfId, ohlc]) => {
                 const range = ohlc.curHigh - ohlc.curLow;
-                
-                // NEXT PERIOD Camarilla L3 & R3 (Hurdle)
                 const nextCamL3 = ohlc.curClose - (range * 1.1 / 4);
                 const nextCamR3 = ohlc.curClose + (range * 1.1 / 4);
-                
-                // NEXT PERIOD Traditional Pivot L1 (S1)
                 const nextPP = (ohlc.curHigh + ohlc.curLow + ohlc.curClose) / 3;
                 const nextTradL1 = (2 * nextPP) - ohlc.curHigh;
 
                 const nextZoneLow  = Math.min(nextCamL3, nextTradL1);
                 const nextZoneHigh = Math.max(nextCamL3, nextTradL1);
 
-                // Gap from Current Closing Price to Next Period Cam R3 Hurdle
                 const gapPoints = Math.max(0, nextCamR3 - currentClose);
                 const gapPct = (gapPoints / currentClose) * 100;
 
-                // Check if Today's Candle / Current Close is crossing or touching the Next Period Zone
                 const isCrossingNextZone = (todayLow <= nextZoneHigh && todayHigh >= nextZoneLow) ||
                                            (Math.abs(currentClose - nextZoneHigh) / currentClose <= 0.015);
 
                 stockEntries.push({
                     ...stockMeta,
                     tf: tfId,
-                    currentClose: currentClose.toFixed(2),
-                    todayLow: todayLow.toFixed(2),
-                    todayHigh: todayHigh.toFixed(2),
-                    nextCamL3: nextCamL3.toFixed(2),
-                    nextTradL1: nextTradL1.toFixed(2),
-                    nextCamR3: nextCamR3.toFixed(2),
-                    nextZoneLow: nextZoneLow.toFixed(2),
-                    nextZoneHigh: nextZoneHigh.toFixed(2),
-                    gapPoints: gapPoints.toFixed(2),
-                    gapPct: gapPct.toFixed(2),
-                    isCrossing: isCrossingNextZone
+                    currentClose: parseFloat(currentClose.toFixed(2)),
+                    todayLow: parseFloat(todayLow.toFixed(2)),
+                    todayHigh: parseFloat(todayHigh.toFixed(2)),
+                    nextCamL3: parseFloat(nextCamL3.toFixed(2)),
+                    nextTradL1: parseFloat(nextTradL1.toFixed(2)),
+                    nextCamR3: parseFloat(nextCamR3.toFixed(2)),
+                    nextZoneLow: parseFloat(nextZoneLow.toFixed(2)),
+                    nextZoneHigh: parseFloat(nextZoneHigh.toFixed(2)),
+                    gapPoints: parseFloat(gapPoints.toFixed(2)),
+                    gapPct: parseFloat(gapPct.toFixed(2)),
+                    isCrossing: isCrossingNextZone,
+                    smas: {
+                        daily20: parseFloat(smas.daily20.toFixed(2)),
+                        daily50: parseFloat(smas.daily50.toFixed(2)),
+                        daily200: parseFloat(smas.daily200.toFixed(2)),
+                        weekly20: parseFloat(smas.weekly20.toFixed(2)),
+                        weekly200: parseFloat(smas.weekly200.toFixed(2))
+                    },
+                    chartCandles
                 });
             });
 
@@ -281,12 +388,12 @@
 
         async function fetchAllRealNSEStocks() {
             const statusEl = document.getElementById('sync-status');
-            statusEl.innerText = "🔄 Fetching NSE Closing & Next Period Levels...";
+            statusEl.innerText = "🔄 Fetching NSE Closing, Hurdles & 5 SMAs...";
             
             let allResults = [];
             for (let st of WATCHLIST) {
                 try {
-                    statusEl.innerText = `⏳ Calculating Next Period: ${st.symbol}...`;
+                    statusEl.innerText = `⏳ Loading Chart & SMAs: ${st.symbol}...`;
                     const entries = await fetchStockHistoryNSE(st);
                     allResults.push(...entries);
                 } catch (err) {
@@ -297,7 +404,7 @@
             if (allResults.length > 0) {
                 calculatedRecords = allResults;
                 const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-                statusEl.innerHTML = `<span style="color:#10b981;">✅ Real NSE Closing Synced (${WATCHLIST.length} Stocks)</span>`;
+                statusEl.innerHTML = `<span style="color:#10b981;">✅ Live NSE & SMAs Ready (${WATCHLIST.length} Stocks)</span>`;
                 document.getElementById('last-updated-time').innerText = `Updated: ${now}`;
                 render();
             } else {
@@ -319,7 +426,7 @@
                     industry: "NSE Listed",
                     category: "Equity"
                 });
-                localStorage.setItem('md_nse_watchlist_v2', JSON.stringify(WATCHLIST));
+                localStorage.setItem('md_nse_watchlist_v3', JSON.stringify(WATCHLIST));
             }
             input.value = '';
             await fetchAllRealNSEStocks();
@@ -369,7 +476,7 @@
                 Object.keys(grouped).forEach(sec => {
                     html += `
                         <div class="sector-card" onclick="openSec('${nav.tf}', '${sec}')">
-                            <div><h3>${sec}</h3><p style="font-size:0.74rem;color:#94a3b8;">${tfObj.nextLabel} L3-L1 Zone & Cam R3 Hurdle</p></div>
+                            <div><h3>${sec}</h3><p style="font-size:0.74rem;color:#94a3b8;">${tfObj.nextLabel} Zone, Hurdle & SMA Chart</p></div>
                             <div class="sector-count-pill">${grouped[sec].length} Stocks &rsaquo;</div>
                         </div>`;
                 });
@@ -392,7 +499,7 @@
                                 </div>
                                 <div>
                                     <div class="stock-ltp">₹${st.currentClose}</div>
-                                    <div style="font-size:0.68rem;color:#94a3b8;">Current Close (Day L: ₹${st.todayLow} | H: ₹${st.todayHigh})</div>
+                                    <div style="font-size:0.68rem;color:#94a3b8;">Day L: ₹${st.todayLow} | H: ₹${st.todayHigh}</div>
                                 </div>
                             </div>
                             <div class="zone-box">
@@ -410,6 +517,12 @@
                                     <strong>₹${st.nextCamR3}</strong>
                                 </div>
                             </div>
+
+                            <!-- NEW VISUAL CHART & 5 SMAs BUTTON -->
+                            <button class="chart-btn" onclick="openVisualChart('${st.symbol}', '${st.tf}')">
+                                📈 View Visual Chart (Hurdle, L1/L3 & 5 SMAs)
+                            </button>
+
                             <div class="stock-footer-meta">
                                 <b>Category:</b> ${st.category} &bull; <b>Theme:</b> ${st.theme}<br>
                                 <b>Industry:</b> ${st.industry} &bull; <b>Sector:</b> ${st.sector}
@@ -418,6 +531,150 @@
                 });
                 container.innerHTML = html;
             }
+        }
+
+        // =========================================================================
+        // VISUAL CANDLESTICK + HURDLE + L1/L3 + 5 SMAs CHART ENGINE
+        // =========================================================================
+        function openVisualChart(symbol, tfId) {
+            const st = calculatedRecords.find(r => r.symbol === symbol && r.tf === tfId);
+            if (!st) return;
+
+            const tfObj = TIMEFRAMES.find(t => t.id === tfId);
+            document.getElementById('modal-stock-title').innerText = `NSE: ${st.symbol} (₹${st.currentClose})`;
+            document.getElementById('modal-stock-sub').innerText = `Daily Candles + ${tfObj.nextLabel} Zone, Hurdle & 5 SMAs`;
+
+            // Populate Exact Price Legend Grid
+            const legendItems = [
+                { label: `🚧 ${tfObj.nextLabel} R3 Hurdle`, val: `₹${st.nextCamR3}`, color: '#f43f5e' },
+                { label: `📍 Current Close`, val: `₹${st.currentClose}`, color: '#38bdf8' },
+                { label: `🟢 ${tfObj.nextLabel} Cam L3`, val: `₹${st.nextCamL3}`, color: '#10b981' },
+                { label: `🟡 ${tfObj.nextLabel} Trad L1`, val: `₹${st.nextTradL1}`, color: '#f59e0b' },
+                { label: `🔵 Daily SMA 20`, val: `₹${st.smas.daily20}`, color: '#60a5fa' },
+                { label: `🟣 Daily SMA 50`, val: `₹${st.smas.daily50}`, color: '#c084fc' },
+                { label: `⚪ Daily SMA 200`, val: `₹${st.smas.daily200}`, color: '#f8fafc' },
+                { label: `🟠 Weekly SMA 20`, val: `₹${st.smas.weekly20}`, color: '#fb923c' },
+                { label: `🔴 Weekly SMA 200`, val: `₹${st.smas.weekly200}`, color: '#ef4444' },
+                { label: `🎯 Profit Gap to R3`, val: `+₹${st.gapPoints} (${st.gapPct}%)`, color: '#34d399' }
+            ];
+
+            document.getElementById('modal-levels-grid').innerHTML = legendItems.map(item => `
+                <div class="legend-item" style="border-left-color: ${item.color};">
+                    <span>${item.label}</span>
+                    <strong>${item.val}</strong>
+                </div>
+            `).join('');
+
+            document.getElementById('chartModal').style.display = 'flex';
+            drawStockCanvas(st, tfObj);
+        }
+
+        function closeChartModal() {
+            document.getElementById('chartModal').style.display = 'none';
+        }
+
+        function drawStockCanvas(st, tfObj) {
+            const canvas = document.getElementById('stockCanvas');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+
+            const W = rect.width;
+            const H = rect.height;
+            const padLeft = 10, padRight = 82, padTop = 18, padBottom = 18;
+            const plotW = W - padLeft - padRight;
+            const plotH = H - padTop - padBottom;
+
+            ctx.clearRect(0, 0, W, H);
+
+            // Gather all prices (Candles + Hurdle + L3 + L1 + 5 SMAs) to auto-scale Y-axis cleanly
+            const candles = st.chartCandles;
+            let allPrices = [
+                st.nextCamR3, st.nextCamL3, st.nextTradL1,
+                st.smas.daily20, st.smas.daily50, st.smas.daily200,
+                st.smas.weekly20, st.smas.weekly200
+            ];
+            candles.forEach(c => { allPrices.push(c.high, c.low); });
+
+            const minP = Math.min(...allPrices) * 0.992;
+            const maxP = Math.max(...allPrices) * 1.008;
+            const priceRange = maxP - minP || 1;
+
+            const getY = (price) => padTop + plotH - ((price - minP) / priceRange) * plotH;
+
+            // 1. Shade L3 - L1 Entry Zone Band
+            const yZoneTop = getY(st.nextZoneHigh);
+            const yZoneBot = getY(st.nextZoneLow);
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.14)';
+            ctx.fillRect(padLeft, yZoneTop, plotW, Math.max(3, yZoneBot - yZoneTop));
+
+            // 2. Draw Daily Candles
+            const stepX = plotW / candles.length;
+            const candleW = Math.max(3, stepX * 0.62);
+
+            candles.forEach((c, idx) => {
+                const xCenter = padLeft + idx * stepX + stepX / 2;
+                const isBull = c.close >= c.open;
+                ctx.strokeStyle = isBull ? '#10b981' : '#ef4444';
+                ctx.fillStyle   = isBull ? '#10b981' : '#ef4444';
+
+                // Wick
+                ctx.beginPath();
+                ctx.moveTo(xCenter, getY(c.high));
+                ctx.lineTo(xCenter, getY(c.low));
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+
+                // Body
+                const yOpen = getY(c.open);
+                const yClose = getY(c.close);
+                const bodyTop = Math.min(yOpen, yClose);
+                const bodyH = Math.max(2, Math.abs(yClose - yOpen));
+                ctx.fillRect(xCenter - candleW / 2, bodyTop, candleW, bodyH);
+            });
+
+            // Helper to draw horizontal level line + right-axis price tag
+            function drawLevelLine(price, label, color, dashed = false) {
+                const y = getY(price);
+                ctx.save();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = dashed ? 1.1 : 1.6;
+                if (dashed) ctx.setLineDash([4, 3]);
+                ctx.beginPath();
+                ctx.moveTo(padLeft, y);
+                ctx.lineTo(padLeft + plotW, y);
+                ctx.stroke();
+                ctx.restore();
+
+                // Right-side Label Pill
+                ctx.fillStyle = color;
+                ctx.fillRect(padLeft + plotW + 2, y - 8, padRight - 4, 16);
+                ctx.fillStyle = '#090d16';
+                ctx.font = 'bold 9px sans-serif';
+                ctx.fillText(`${label}:${Math.round(price)}`, padLeft + plotW + 5, y + 3);
+            }
+
+            // 3. Draw 5 SMA Lines (Dashed)
+            drawLevelLine(st.smas.weekly200, 'W200', '#ef4444', true);
+            drawLevelLine(st.smas.weekly20,  'W20',  '#fb923c', true);
+            drawLevelLine(st.smas.daily200,  'D200', '#f8fafc', true);
+            drawLevelLine(st.smas.daily50,   'D50',  '#c084fc', true);
+            drawLevelLine(st.smas.daily20,   'D20',  '#60a5fa', true);
+
+            // 4. Draw Next Period Hurdle (R3), Cam L3, Trad L1 (Solid Bold Lines)
+            drawLevelLine(st.nextCamR3,  'R3',   '#f43f5e', false);
+            drawLevelLine(st.nextCamL3,  'L3',   '#10b981', false);
+            drawLevelLine(st.nextTradL1, 'L1',   '#f59e0b', false);
+
+            // 5. Highlight Current Close Marker on latest candle
+            const yCur = getY(st.currentClose);
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(padLeft + plotW - stepX / 2, yCur, 4, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         setFilter('CROSS');
