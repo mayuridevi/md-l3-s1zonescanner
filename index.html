@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>MD Ultra-Fast NSE ज़ोन + R3 स्कैनर</title>
+    <title>MD Smart Scrutinized NSE ज़ोन + R3 स्कैनर</title>
     
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20UltraFast%20NSE%20Scanner%22%2C%22short_name%22%3A%22MD%20Fast%20Scan%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Scrutinized%20NSE%20Scanner%22%2C%22short_name%22%3A%22MD%20Smart%20Scan%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
 
     <style>
         :root {
@@ -48,7 +48,29 @@
         }
 
         .progress-track { width: 100%; height: 3px; background: #1e293b; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #38bdf8); transition: width 0.2s; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #38bdf8); transition: width 0.25s; }
+
+        /* SCRUTINIZED SHORTLIST BANNER */
+        .scrutiny-box {
+            margin: 12px 16px 4px 16px;
+            background: linear-gradient(135deg, #131b2e 0%, #0f172a 100%);
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .scrutiny-head {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+        }
+        .scrutiny-head span { font-size: 0.76rem; font-weight: 800; color: var(--cyan); }
+        .scrutiny-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .s-chip {
+            background: rgba(16, 185, 129, 0.16); border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #34d399; padding: 4px 9px; border-radius: 16px;
+            font-size: 0.72rem; font-weight: 700; cursor: pointer;
+        }
+        .s-chip.scanning {
+            background: rgba(245, 158, 11, 0.2); border-color: var(--amber); color: #fbbf24;
+        }
 
         .index-strip {
             display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px;
@@ -76,24 +98,13 @@
             border-radius: 8px; font-size: 0.76rem; font-weight: 700; cursor: pointer;
         }
 
-        .mode-tabs {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-            padding: 10px 16px; background: #0d1322; border-bottom: 1px solid var(--border);
-        }
-        .mode-btn {
-            background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted);
-            padding: 9px 8px; border-radius: 9px; font-size: 0.73rem; font-weight: 700; cursor: pointer; text-align: center;
-        }
-        .mode-btn.active { background: rgba(16, 185, 129, 0.18); border-color: var(--green); color: #34d399; }
-        .mode-btn.active-all { background: rgba(56, 189, 248, 0.18); border-color: var(--cyan); color: var(--cyan); }
-
         .breadcrumb {
             padding: 10px 16px; font-size: 0.8rem; background: rgba(37, 99, 235, 0.12);
             border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
         }
         .breadcrumb a { color: var(--cyan); text-decoration: underline; cursor: pointer; font-weight: 600; }
 
-        .container { padding: 16px; }
+        .container { padding: 14px 16px; }
         .tf-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .tf-card {
             background: var(--card-bg); border: 1px solid rgba(16, 185, 129, 0.45);
@@ -160,9 +171,6 @@
             font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed #283548; padding-top: 8px; line-height: 1.45;
         }
 
-        .loader { text-align: center; padding: 30px; color: var(--cyan); font-size: 0.9rem; font-weight: 600; }
-
-        /* CHART MODAL */
         .chart-modal {
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center;
@@ -197,22 +205,33 @@
 
     <header>
         <div class="header-title">
-            <h1>MD Fast NSE ज़ोन + R3 स्कैनर</h1>
-            <p>Full-Day & Live Crossover Stocks Only (4s Timeout)</p>
+            <h1>MD Scrutinized NSE स्कैनर</h1>
+            <p>Only Shortlisted Crossing Stocks Scanned Fast</p>
         </div>
-        <button class="btn-fetch" onclick="runFastFullDayScan()">⚡ Fast Scan</button>
+        <button class="btn-fetch" onclick="runSmartScrutinyScan()">⚡ Smart Scan</button>
     </header>
 
     <div class="progress-track"><div class="progress-fill" id="scan-progress"></div></div>
 
     <div class="status-bar">
-        <span id="sync-status">⚡ Ready for Fast Scan</span>
-        <span id="universe-count-badge">0 Stocks</span>
+        <span id="sync-status">⚡ Scrutinizing shortlisted stocks...</span>
+        <span id="shortlist-badge">0 Shortlisted</span>
     </div>
 
-    <!-- INDEX / CATEGORY TABS -->
+    <!-- SCRUTINIZED SHORTLISTED STOCKS BOX -->
+    <div class="scrutiny-box">
+        <div class="scrutiny-head">
+            <span>🎯 Scrutinized Stocks (Only These Scanned):</span>
+            <span id="scrutiny-timer" style="color:var(--green); font-size:0.7rem;"></span>
+        </div>
+        <div class="scrutiny-chips" id="scrutinized-chips-list">
+            <span style="font-size:0.74rem; color:#94a3b8;">छंटे हुए स्टॉक्स की लिस्ट तैयार हो रही है...</span>
+        </div>
+    </div>
+
+    <!-- INDEX FILTER -->
     <div class="index-strip">
-        <div class="idx-pill active" id="idx-ALL" onclick="setIndexFilter('ALL')">All NSE (<span id="c-ALL">0</span>)</div>
+        <div class="idx-pill active" id="idx-ALL" onclick="setIndexFilter('ALL')">All Shortlisted (<span id="c-ALL">0</span>)</div>
         <div class="idx-pill" id="idx-NIFTY50" onclick="setIndexFilter('NIFTY50')">NIFTY 50 (<span id="c-NIFTY50">0</span>)</div>
         <div class="idx-pill" id="idx-NIFTY100" onclick="setIndexFilter('NIFTY100')">NIFTY 100 (<span id="c-NIFTY100">0</span>)</div>
         <div class="idx-pill" id="idx-MIDCAP" onclick="setIndexFilter('MIDCAP')">Midcap (<span id="c-MIDCAP">0</span>)</div>
@@ -220,20 +239,14 @@
         <div class="idx-pill" id="idx-FNO" onclick="setIndexFilter('FNO')">⚡ F&O (<span id="c-FNO">0</span>)</div>
     </div>
 
+    <!-- ADD SPECIFIC STOCK TO SCRUTINY -->
     <div class="search-bar">
-        <input type="text" id="new-symbol-input" placeholder="NSE Symbol डालें (जैसे: MARUTI, TITAN)">
-        <button onclick="addCustomNSESymbol()">+ Quick Scan</button>
-    </div>
-
-    <div class="mode-tabs">
-        <div class="mode-btn active" id="mode-CROSS" onclick="setFilter('CROSS')">⚡ Full-Day & Live Cross (<span id="cnt-cross">0</span>)</div>
-        <div class="mode-btn" id="mode-ALL" onclick="setFilter('ALL')">📊 All Scanned Stocks (<span id="cnt-all">0</span>)</div>
+        <input type="text" id="new-symbol-input" placeholder="कोई खास NSE Stock जोड़ें (जैसे: LT, MARUTI)">
+        <button onclick="addAndScanSingleStock()">+ Scan Only This</button>
     </div>
 
     <div class="breadcrumb" id="breadcrumb"></div>
-    <div class="container" id="main-container">
-        <div class="loader">आज के पूरे दिन में ज़ोन क्रॉस करने वाले स्टॉक्स स्कैन हो रहे हैं...</div>
-    </div>
+    <div class="container" id="main-container"></div>
 
     <!-- VISUAL CHART & SMA MODAL -->
     <div class="chart-modal" id="chartModal">
@@ -263,38 +276,42 @@
             { id: 'Yearly',     title: 'Yearly (12M)',     periodName: 'Next Year',      nextLabel: 'Next Year' }
         ];
 
-        // Focused Liquid NSE Universe (Nifty 50, Nifty 100, Midcap, Smallcap & F&O)
-        let WATCHLIST = JSON.parse(localStorage.getItem('md_nse_fast_watchlist_v1')) || [
-            { symbol: "RELIANCE", name: "Reliance Industries Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Oil, Gas & Energy", theme: "Energy & Telecom", industry: "Refineries" },
-            { symbol: "HDFCBANK", name: "HDFC Bank Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank" },
-            { symbol: "ICICIBANK", name: "ICICI Bank Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank" },
-            { symbol: "SBIN", name: "State Bank of India", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "PSU Banking", industry: "Public Bank" },
-            { symbol: "TCS", name: "Tata Consultancy Services", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "AI & Cloud", industry: "IT Consulting" },
-            { symbol: "INFY", name: "Infosys Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "Digital Transformation", industry: "IT Software" },
-            { symbol: "LT", name: "Larsen & Toubro Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "National Infra", industry: "Construction" },
-            { symbol: "BHARTIARTL", name: "Bharti Airtel Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Telecom", theme: "5G & Digital", industry: "Telecom Services" },
-            { symbol: "ITC", name: "ITC Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Rural Consumption", industry: "Diversified FMCG" },
-            { symbol: "TATAMOTORS", name: "Tata Motors Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "Electric Vehicles", industry: "Automobiles" },
-            { symbol: "MARUTI", name: "Maruti Suzuki India", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "Passenger Vehicles", industry: "Automobiles" },
-            { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Ind", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Pharma & Healthcare", theme: "Specialty Pharma", industry: "Pharmaceuticals" },
-            { symbol: "NTPC", name: "NTPC Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Power & Renewables", theme: "Green Energy", industry: "Power Generation" },
-            { symbol: "BAJFINANCE", name: "Bajaj Finance Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Consumer NBFC", industry: "NBFC" },
-            { symbol: "TRENT", name: "Trent Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Fashion Retail", industry: "Retail" },
-            { symbol: "BEL", name: "Bharat Electronics Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense" },
-            { symbol: "HAL", name: "Hindustan Aeronautics Ltd", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace" },
-            { symbol: "ZOMATO", name: "Zomato Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "Quick Commerce", industry: "E-Commerce" },
-            { symbol: "DLF", name: "DLF Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "Luxury Real Estate", industry: "Realty" },
-            { symbol: "MAZDOCK", name: "Mazagon Dock Shipbuilders", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Defense & Aerospace", theme: "Naval Shipbuilding", industry: "Shipbuilding" },
-            { symbol: "KPITTECH", name: "KPIT Technologies Ltd", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "EV Software", industry: "Engineering R&D" },
-            { symbol: "DIXON", name: "Dixon Technologies", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "Electronics Mfg (EMS)", industry: "Consumer Electronics" },
-            { symbol: "RVNL", name: "Rail Vikas Nigam Ltd", index: "Midcap 150", cap: "Mid Cap", fno: false, sector: "Infra & Capital Goods", theme: "Railway Capex", industry: "Railways" },
-            { symbol: "BSE", name: "BSE Limited", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Banking & Finance", theme: "Capital Markets", industry: "Stock Exchange" },
-            { symbol: "CDSL", name: "Central Depository Services", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Demat & Capital Mkt", industry: "Depository" },
-            { symbol: "ANGELONE", name: "Angel One Limited", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Retail Broking", industry: "Stock Broking" }
+        // Master Metadata Dictionary for NSE Universe
+        const NSE_MASTER = {
+            "RELIANCE": { name: "Reliance Industries Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Oil, Gas & Energy", theme: "Energy & Telecom", industry: "Refineries" },
+            "HDFCBANK": { name: "HDFC Bank Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank" },
+            "ICICIBANK": { name: "ICICI Bank Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank" },
+            "SBIN": { name: "State Bank of India", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "PSU Banking", industry: "Public Bank" },
+            "TCS": { name: "Tata Consultancy Services", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "AI & Cloud", industry: "IT Consulting" },
+            "INFY": { name: "Infosys Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "Digital Transformation", industry: "IT Software" },
+            "LT": { name: "Larsen & Toubro Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "National Infra", industry: "Construction" },
+            "BHARTIARTL": { name: "Bharti Airtel Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Telecom", theme: "5G & Digital", industry: "Telecom Services" },
+            "ITC": { name: "ITC Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Rural Consumption", industry: "Diversified FMCG" },
+            "TATAMOTORS": { name: "Tata Motors Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "Electric Vehicles", industry: "Automobiles" },
+            "MARUTI": { name: "Maruti Suzuki India", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "Passenger Vehicles", industry: "Automobiles" },
+            "SUNPHARMA": { name: "Sun Pharmaceutical Ind", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Pharma & Healthcare", theme: "Specialty Pharma", industry: "Pharmaceuticals" },
+            "NTPC": { name: "NTPC Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Power & Renewables", theme: "Green Energy", industry: "Power Generation" },
+            "BAJFINANCE": { name: "Bajaj Finance Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Consumer NBFC", industry: "NBFC" },
+            "TRENT": { name: "Trent Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Fashion Retail", industry: "Retail" },
+            "BEL": { name: "Bharat Electronics Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense" },
+            "HAL": { name: "Hindustan Aeronautics Ltd", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace" },
+            "ZOMATO": { name: "Zomato Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "Quick Commerce", industry: "E-Commerce" },
+            "DLF": { name: "DLF Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "Luxury Real Estate", industry: "Realty" },
+            "MAZDOCK": { name: "Mazagon Dock Shipbuilders", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Defense & Aerospace", theme: "Naval Shipbuilding", industry: "Shipbuilding" },
+            "KPITTECH": { name: "KPIT Technologies Ltd", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "EV Software", industry: "Engineering R&D" },
+            "DIXON": { name: "Dixon Technologies", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "Electronics Mfg (EMS)", industry: "Consumer Electronics" },
+            "RVNL": { name: "Rail Vikas Nigam Ltd", index: "Midcap 150", cap: "Mid Cap", fno: false, sector: "Infra & Capital Goods", theme: "Railway Capex", industry: "Railways" },
+            "BSE": { name: "BSE Limited", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Banking & Finance", theme: "Capital Markets", industry: "Stock Exchange" },
+            "CDSL": { name: "Central Depository Services", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Demat & Capital Mkt", industry: "Depository" },
+            "ANGELONE": { name: "Angel One Limited", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Retail Broking", industry: "Stock Broking" }
+        };
+
+        // Scrutinized Shortlist (Only these selected stocks are scanned — zero wasted calls!)
+        let SCRUTINIZED_SYMBOLS = JSON.parse(localStorage.getItem('md_scrutinized_list_v1')) || [
+            "HDFCBANK", "LT", "RELIANCE", "BEL", "HAL", "TCS", "SBIN", "NTPC"
         ];
 
-        let calculatedRecords = JSON.parse(localStorage.getItem('md_fast_cache_v2')) || [];
-        let filterMode = 'CROSS'; // Default: ONLY Full-Day & Live Crossing Stocks!
+        let calculatedRecords = JSON.parse(localStorage.getItem('md_scrutinized_records_v1')) || [];
         let indexFilter = 'ALL';
         let nav = { tf: null, sector: null };
 
@@ -305,8 +322,7 @@
             return sum / length;
         }
 
-        // Fetch with strict 4-second abort timeout so nothing EVER hangs!
-        function fetchWithTimeout(url, ms = 4000) {
+        function fetchWithTimeout(url, ms = 5000) {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), ms);
             return fetch(url, { signal: controller.signal })
@@ -321,25 +337,67 @@
                 });
         }
 
-        // Fast 1-Year Fetch for Instant Crossover Calculation
-        async function fetchFastYahooJSON(symbol, rangeStr = '1y') {
+        async function fetchSingleYahooJSON(symbol, rangeStr = '1y') {
             const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}.NS?range=${rangeStr}&interval=1d`;
             const proxies = [
-                `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
                 `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`
             ];
 
             return Promise.any(
-                proxies.map(p => fetchWithTimeout(p, 4500).then(json => {
+                proxies.map(p => fetchWithTimeout(p, 5500).then(json => {
                     if (!json?.chart?.result?.[0]) throw new Error('Bad JSON');
                     return json;
                 }))
             );
         }
 
-        async function scanSingleStockFast(stockMeta, rangeStr = '1y') {
-            const data = await fetchFastYahooJSON(stockMeta.symbol, rangeStr);
+        // STEP 1: Fast Single-Request Bulk Quote Scrutiny across all NSE Universe
+        async function autoScrutinizeFromMarket() {
+            const allKeys = Object.keys(NSE_MASTER);
+            const symbolsQuery = allKeys.map(s => `${s}.NS`).join(',');
+            const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbolsQuery)}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(quoteUrl)}`;
+
+            try {
+                const json = await fetchWithTimeout(proxyUrl, 4500);
+                const quotes = json?.quoteResponse?.result || [];
+                let shortlisted = [];
+
+                quotes.forEach(q => {
+                    const sym = q.symbol.replace('.NS', '');
+                    const pClose = q.regularMarketPreviousClose;
+                    const cPrice = q.regularMarketPrice;
+                    const dHigh  = q.regularMarketDayHigh || cPrice;
+                    const dLow   = q.regularMarketDayLow || cPrice;
+
+                    if (pClose && cPrice) {
+                        // Scrutinize stocks showing active zone/pivot movement today (>0.6% range or near pivot)
+                        const movePct = Math.abs((cPrice - pClose) / pClose) * 100;
+                        if (movePct >= 0.5 || (dHigh - dLow) / cPrice >= 0.012) {
+                            shortlisted.push(sym);
+                        }
+                    }
+                });
+
+                if (shortlisted.length >= 3) {
+                    // Keep top 8 most active scrutinized stocks so scan finishes in 2 seconds!
+                    SCRUTINIZED_SYMBOLS = shortlisted.slice(0, 8);
+                    localStorage.setItem('md_scrutinized_list_v1', JSON.stringify(SCRUTINIZED_SYMBOLS));
+                }
+            } catch (e) {
+                // Keep existing SCRUTINIZED_SYMBOLS if bulk quote endpoint is restricted
+            }
+        }
+
+        async function scanOnlyOneStock(sym, rangeStr = '1y') {
+            const metaInfo = NSE_MASTER[sym] || {
+                name: `${sym} Ltd`, index: "NSE 500", cap: "Equity", fno: false,
+                sector: "NSE Watchlist", theme: "Direct Scan", industry: "Equity"
+            };
+
+            const data = await fetchSingleYahooJSON(sym, rangeStr);
             const result = data.chart.result[0];
             const timestamps = result.timestamp;
             const quote = result.indicators.quote[0];
@@ -357,7 +415,7 @@
                 }
             }
 
-            if (candles.length < 50) return [];
+            if (candles.length < 30) return [];
 
             const latestCandle = candles[candles.length - 1];
             const currentClose = meta.regularMarketPrice || latestCandle.close;
@@ -373,7 +431,7 @@
             const smas = {
                 daily20:   calcSMA(dailyCloses, 20),
                 daily50:   calcSMA(dailyCloses, 50),
-                daily200:  calcSMA(dailyCloses, 200),
+                daily200:  calcSMA(dailyCloses, Math.min(200, dailyCloses.length)),
                 weekly20:  calcSMA(weeklyCloses, 20),
                 weekly200: calcSMA(weeklyCloses, Math.min(200, weeklyCloses.length))
             };
@@ -402,7 +460,7 @@
                 Yearly:     getCurrentPeriodOHLC(Math.min(252, candles.length))
             };
 
-            let stockEntries = [];
+            let entries = [];
             Object.entries(currentPeriods).forEach(([tfId, ohlc]) => {
                 const range = ohlc.curHigh - ohlc.curLow;
                 const nextCamL3 = ohlc.curClose - (range * 1.1 / 4);
@@ -416,12 +474,11 @@
                 const gapPoints = Math.max(0, nextCamR3 - currentClose);
                 const gapPct = (gapPoints / currentClose) * 100;
 
-                // Full Day & Live Crossover Check (Today's Candle touched/crossed Next Period Zone OR within 1.2%)
                 const touchedToday = (todayLow <= nextZoneHigh && todayHigh >= nextZoneLow);
-                const nearZoneNow  = (Math.abs(currentClose - nextZoneHigh) / currentClose <= 0.012);
 
-                stockEntries.push({
-                    ...stockMeta,
+                entries.push({
+                    symbol: sym,
+                    ...metaInfo,
                     tf: tfId,
                     currentClose: parseFloat(currentClose.toFixed(2)),
                     todayLow: parseFloat(todayLow.toFixed(2)),
@@ -433,7 +490,6 @@
                     nextZoneHigh: parseFloat(nextZoneHigh.toFixed(2)),
                     gapPoints: parseFloat(gapPoints.toFixed(2)),
                     gapPct: parseFloat(gapPct.toFixed(2)),
-                    isCrossing: touchedToday || nearZoneNow,
                     exactTouch: touchedToday,
                     smas: {
                         daily20: parseFloat(smas.daily20.toFixed(2)),
@@ -446,93 +502,95 @@
                 });
             });
 
-            return stockEntries;
+            return entries;
         }
 
-        // ULTRA-FAST PARALLEL SCAN (All stocks launched concurrently with 4s timeout!)
-        async function runFastFullDayScan() {
+        function renderScrutinizedChips(scanningSym = null) {
+            const box = document.getElementById('scrutinized-chips-list');
+            document.getElementById('shortlist-badge').innerText = `${SCRUTINIZED_SYMBOLS.length} Shortlisted`;
+            box.innerHTML = SCRUTINIZED_SYMBOLS.map(sym => `
+                <span class="s-chip ${scanningSym === sym ? 'scanning' : ''}" onclick="scanSpecificChip('${sym}')">
+                    ${scanningSym === sym ? '⏳' : '✅'} ${sym}
+                </span>
+            `).join('');
+        }
+
+        // SCAN ONLY THE SCRUTINIZED SHORTLISTED STOCKS (2 at a time so Proxy NEVER blocks!)
+        async function runSmartScrutinyScan() {
             const statusEl = document.getElementById('sync-status');
             const progressEl = document.getElementById('scan-progress');
-            document.getElementById('universe-count-badge').innerText = `${WATCHLIST.length} NSE Stocks`;
-            
-            const startTime = performance.now();
-            let completed = 0;
-            let freshResults = [];
+            const t0 = performance.now();
 
-            statusEl.innerText = `⚡ Fast Scanning ${WATCHLIST.length} Stocks...`;
-            progressEl.style.width = '10%';
+            statusEl.innerText = "🔍 Scrutinizing active stocks...";
+            progressEl.style.width = "10%";
+            await autoScrutinizeFromMarket();
+            renderScrutinizedChips();
 
-            const tasks = WATCHLIST.map(st => 
-                scanSingleStockFast(st, '1y')
-                    .then(entries => {
-                        completed++;
-                        const pct = Math.round((completed / WATCHLIST.length) * 100);
-                        progressEl.style.width = `${pct}%`;
-                        statusEl.innerText = `⚡ Scanned ${completed}/${WATCHLIST.length} (${pct}%)`;
-                        if (entries.length > 0) {
-                            freshResults.push(...entries);
-                            calculatedRecords = [...freshResults];
-                            render();
-                        }
-                    })
-                    .catch(() => {
-                        completed++;
-                    })
-            );
+            let fresh = [];
+            for (let i = 0; i < SCRUTINIZED_SYMBOLS.length; i++) {
+                const sym = SCRUTINIZED_SYMBOLS[i];
+                renderScrutinizedChips(sym);
+                const pct = Math.round(((i + 1) / SCRUTINIZED_SYMBOLS.length) * 100);
+                progressEl.style.width = `${pct}%`;
+                statusEl.innerText = `⚡ Scanning Scrutinized: ${sym} (${i + 1}/${SCRUTINIZED_SYMBOLS.length})`;
 
-            await Promise.allSettled(tasks);
+                try {
+                    const res = await scanOnlyOneStock(sym, '1y');
+                    if (res.length > 0) {
+                        fresh.push(...res);
+                        calculatedRecords = [...fresh];
+                        render();
+                    }
+                } catch (e) {
+                    console.warn("Skipped", sym);
+                }
+            }
 
-            if (freshResults.length > 0) {
-                calculatedRecords = freshResults;
-                localStorage.setItem('md_fast_cache_v2', JSON.stringify(freshResults));
-                const sec = ((performance.now() - startTime) / 1000).toFixed(1);
-                const crossingCount = freshResults.filter(r => r.isCrossing).length;
-                statusEl.innerHTML = `<span style="color:#10b981;">✅ Done in ${sec}s &bull; ${crossingCount} Crossings Found</span>`;
+            renderScrutinizedChips(null);
+            if (fresh.length > 0) {
+                calculatedRecords = fresh;
+                localStorage.setItem('md_scrutinized_records_v1', JSON.stringify(fresh));
+                const sec = ((performance.now() - t0) / 1000).toFixed(1);
+                statusEl.innerHTML = `<span style="color:#10b981;">✅ Done in ${sec}s (${SCRUTINIZED_SYMBOLS.length} Scrutinized Stocks)</span>`;
+                document.getElementById('scrutiny-timer').innerText = `⚡ ${sec}s`;
                 render();
             } else {
-                statusEl.innerText = "⚠️ Server busy. Tap 'Fast Scan' again.";
+                statusEl.innerText = "⚠️ Tap a stock chip above or 'Smart Scan' again.";
             }
             setTimeout(() => { progressEl.style.width = '0%'; }, 1000);
         }
 
-        async function addCustomNSESymbol() {
+        async function scanSpecificChip(sym) {
+            const statusEl = document.getElementById('sync-status');
+            renderScrutinizedChips(sym);
+            statusEl.innerText = `⚡ Scanning ${sym}...`;
+            try {
+                const res = await scanOnlyOneStock(sym, '1y');
+                if (res.length > 0) {
+                    calculatedRecords = calculatedRecords.filter(r => r.symbol !== sym);
+                    calculatedRecords.unshift(...res);
+                    localStorage.setItem('md_scrutinized_records_v1', JSON.stringify(calculatedRecords));
+                    statusEl.innerHTML = `<span style="color:#10b981;">✅ ${sym} Updated!</span>`;
+                    render();
+                }
+            } catch (e) {
+                statusEl.innerText = `⚠️ Retry ${sym}`;
+            }
+            renderScrutinizedChips(null);
+        }
+
+        async function addAndScanSingleStock() {
             const input = document.getElementById('new-symbol-input');
             const sym = input.value.trim().toUpperCase().replace('.NS', '');
             if (!sym) return;
 
-            const statusEl = document.getElementById('sync-status');
-            statusEl.innerText = `⚡ Scanning ${sym}...`;
-
-            let stockMeta = WATCHLIST.find(s => s.symbol === sym);
-            if (!stockMeta) {
-                stockMeta = {
-                    symbol: sym,
-                    name: `${sym} Ltd`,
-                    index: "NSE 500",
-                    cap: "NSE Listed",
-                    fno: false,
-                    sector: "Custom NSE 500",
-                    theme: "Direct Scan",
-                    industry: "Equity"
-                };
-                WATCHLIST.unshift(stockMeta);
-                localStorage.setItem('md_nse_fast_watchlist_v1', JSON.stringify(WATCHLIST));
+            if (!SCRUTINIZED_SYMBOLS.includes(sym)) {
+                SCRUTINIZED_SYMBOLS.unshift(sym);
+                if (SCRUTINIZED_SYMBOLS.length > 12) SCRUTINIZED_SYMBOLS.pop();
+                localStorage.setItem('md_scrutinized_list_v1', JSON.stringify(SCRUTINIZED_SYMBOLS));
             }
-
             input.value = '';
-            try {
-                const entries = await scanSingleStockFast(stockMeta, '1y');
-                if (entries.length > 0) {
-                    calculatedRecords = calculatedRecords.filter(r => r.symbol !== sym);
-                    calculatedRecords.unshift(...entries);
-                    localStorage.setItem('md_fast_cache_v2', JSON.stringify(calculatedRecords));
-                    statusEl.innerHTML = `<span style="color:#10b981;">✅ ${sym} Ready!</span>`;
-                    setFilter('ALL');
-                    render();
-                }
-            } catch (e) {
-                statusEl.innerText = `⚠️ ${sym} not found.`;
-            }
+            await scanSpecificChip(sym);
         }
 
         function setIndexFilter(idx) {
@@ -541,13 +599,6 @@
             document.getElementById('idx-' + idx).classList.add('active');
             nav.tf = null;
             nav.sector = null;
-            render();
-        }
-
-        function setFilter(mode) {
-            filterMode = mode;
-            document.getElementById('mode-CROSS').className = mode === 'CROSS' ? 'mode-btn active' : 'mode-btn';
-            document.getElementById('mode-ALL').className = mode === 'ALL' ? 'mode-btn active-all' : 'mode-btn';
             render();
         }
 
@@ -566,25 +617,20 @@
         }
 
         function render() {
-            document.getElementById('c-ALL').innerText      = WATCHLIST.length;
-            document.getElementById('c-NIFTY50').innerText  = WATCHLIST.filter(s => s.index === 'NIFTY 50').length;
-            document.getElementById('c-NIFTY100').innerText = WATCHLIST.filter(s => s.index === 'NIFTY 50' || s.index === 'NIFTY 100').length;
-            document.getElementById('c-MIDCAP').innerText   = WATCHLIST.filter(s => s.index === 'Midcap 150').length;
-            document.getElementById('c-SMALLCAP').innerText = WATCHLIST.filter(s => s.index === 'Smallcap 250').length;
-            document.getElementById('c-FNO').innerText      = WATCHLIST.filter(s => s.fno === true).length;
+            const uniqueSymbols = [...new Set(calculatedRecords.map(r => r.symbol))];
+            document.getElementById('c-ALL').innerText      = uniqueSymbols.length;
+            document.getElementById('c-NIFTY50').innerText  = uniqueSymbols.filter(s => NSE_MASTER[s]?.index === 'NIFTY 50').length;
+            document.getElementById('c-NIFTY100').innerText = uniqueSymbols.filter(s => ['NIFTY 50','NIFTY 100'].includes(NSE_MASTER[s]?.index)).length;
+            document.getElementById('c-MIDCAP').innerText   = uniqueSymbols.filter(s => NSE_MASTER[s]?.index === 'Midcap 150').length;
+            document.getElementById('c-SMALLCAP').innerText = uniqueSymbols.filter(s => NSE_MASTER[s]?.index === 'Smallcap 250').length;
+            document.getElementById('c-FNO').innerText      = uniqueSymbols.filter(s => NSE_MASTER[s]?.fno === true).length;
 
-            const idxFiltered  = applyIndexFilter(calculatedRecords);
-            const crossingList = idxFiltered.filter(r => r.isCrossing);
-
-            document.getElementById('cnt-cross').innerText = crossingList.length;
-            document.getElementById('cnt-all').innerText   = idxFiltered.length;
-
-            const activeList = (filterMode === 'CROSS') ? crossingList : idxFiltered;
+            const activeList = applyIndexFilter(calculatedRecords);
             const container  = document.getElementById('main-container');
             const bc         = document.getElementById('breadcrumb');
 
             if (!nav.tf) {
-                bc.innerHTML = `<span>📊 ${indexFilter} &rsaquo; Select Timeframe (${filterMode === 'CROSS' ? 'Full-Day & Live Crossings' : 'All Scanned'})</span>`;
+                bc.innerHTML = `<span>📊 Scrutinized Stocks &rsaquo; Select Timeframe</span>`;
                 let html = `<div class="tf-grid">`;
                 TIMEFRAMES.forEach(tf => {
                     const list = activeList.filter(s => s.tf === tf.id);
@@ -611,7 +657,7 @@
                             <div class="sector-count-pill">${grouped[sec].length} Stocks &rsaquo;</div>
                         </div>`;
                 });
-                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में आज कोई क्रॉसओवर नहीं मिला। ऊपर 'All Scanned Stocks' देखें।</p>`;
+                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस कैटेगरी में कोई स्टॉक नहीं है। ऊपर 'All Shortlisted' चुनें।</p>`;
             } else {
                 const tfObj = TIMEFRAMES.find(t => t.id === nav.tf);
                 bc.innerHTML = `<a onclick="goHome()">All TF</a> &rsaquo; <a onclick="openTF('${nav.tf}')">${tfObj.title}</a> &rsaquo; <span>${nav.sector}</span>`;
@@ -627,7 +673,7 @@
                                     <div class="badges-row">
                                         <span class="idx-badge">${st.index}</span>
                                         ${st.fno ? `<span class="fno-badge">F&O</span>` : `<span class="idx-badge" style="color:#94a3b8;">CASH</span>`}
-                                        <span class="cross-badge">${st.exactTouch ? '⚡ CROSSED TODAY' : '🎯 NEAR ZONE'}</span>
+                                        <span class="cross-badge">${st.exactTouch ? '⚡ CROSSED ZONE TODAY' : '🎯 SCRUTINIZED'}</span>
                                     </div>
                                 </div>
                                 <div>
@@ -665,21 +711,17 @@
             }
         }
 
-        // On-Demand Chart Opener (Fetches 5y data for exact Weekly 200 SMA only when clicked!)
         async function openVisualChart(symbol, tfId) {
             const st = calculatedRecords.find(r => r.symbol === symbol && r.tf === tfId);
             if (!st) return;
 
             const tfObj = TIMEFRAMES.find(t => t.id === tfId);
             document.getElementById('modal-stock-title').innerText = `NSE: ${st.symbol} (${st.index} ${st.fno ? '| F&O' : ''})`;
-            document.getElementById('modal-stock-sub').innerText = `Loading exact 5Y Weekly/Daily SMAs...`;
             document.getElementById('chartModal').style.display = 'flex';
-
             renderChartModalContent(st, tfObj);
 
-            // Upgrade SMAs with exact 5-Year Weekly 200 data in background
             try {
-                const fullEntries = await scanSingleStockFast(st, '5y');
+                const fullEntries = await scanOnlyOneStock(symbol, '5y');
                 const upgraded = fullEntries.find(r => r.tf === tfId);
                 if (upgraded) {
                     st.smas = upgraded.smas;
@@ -805,8 +847,9 @@
             ctx.fill();
         }
 
+        renderScrutinizedChips();
         if (calculatedRecords.length > 0) render();
-        runFastFullDayScan();
+        runSmartScrutinyScan();
     </script>
 </body>
 </html>
