@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#090d16">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>MD Turbo NSE 500 / F&O ज़ोन स्कैनर</title>
+    <title>MD Ultra-Fast NSE ज़ोन + R3 स्कैनर</title>
     
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20Turbo%20NSE%20Scanner%22%2C%22short_name%22%3A%22MD%20Turbo%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MD%20UltraFast%20NSE%20Scanner%22%2C%22short_name%22%3A%22MD%20Fast%20Scan%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
 
     <style>
         :root {
@@ -37,17 +37,16 @@
         .header-title p { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
 
         .btn-fetch {
-            background: rgba(16, 185, 129, 0.2); border: 1px solid var(--green);
-            color: #34d399; padding: 7px 11px; border-radius: 20px;
-            font-size: 0.72rem; font-weight: 700; cursor: pointer;
+            background: rgba(16, 185, 129, 0.22); border: 1px solid var(--green);
+            color: #34d399; padding: 7px 12px; border-radius: 20px;
+            font-size: 0.74rem; font-weight: 700; cursor: pointer;
         }
 
         .status-bar {
             padding: 7px 16px; background: #0d1322; border-bottom: 1px solid var(--border);
-            font-size: 0.71rem; color: var(--amber); display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.72rem; color: var(--amber); display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Progress Bar for Turbo Scan */
         .progress-track { width: 100%; height: 3px; background: #1e293b; }
         .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #38bdf8); transition: width 0.2s; }
 
@@ -83,7 +82,7 @@
         }
         .mode-btn {
             background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted);
-            padding: 9px 8px; border-radius: 9px; font-size: 0.74rem; font-weight: 700; cursor: pointer; text-align: center;
+            padding: 9px 8px; border-radius: 9px; font-size: 0.73rem; font-weight: 700; cursor: pointer; text-align: center;
         }
         .mode-btn.active { background: rgba(16, 185, 129, 0.18); border-color: var(--green); color: #34d399; }
         .mode-btn.active-all { background: rgba(56, 189, 248, 0.18); border-color: var(--cyan); color: var(--cyan); }
@@ -198,16 +197,16 @@
 
     <header>
         <div class="header-title">
-            <h1>MD Turbo NSE 500 / F&O स्कैनर</h1>
-            <p>Multi-Proxy High-Speed Scan &bull; L3/L1 & R3 Hurdle</p>
+            <h1>MD Fast NSE ज़ोन + R3 स्कैनर</h1>
+            <p>Full-Day & Live Crossover Stocks Only (4s Timeout)</p>
         </div>
-        <button class="btn-fetch" onclick="fetchAllRealNSEStocks(true)">⚡ Turbo Scan</button>
+        <button class="btn-fetch" onclick="runFastFullDayScan()">⚡ Fast Scan</button>
     </header>
 
     <div class="progress-track"><div class="progress-fill" id="scan-progress"></div></div>
 
     <div class="status-bar">
-        <span id="sync-status">⚡ Ready</span>
+        <span id="sync-status">⚡ Ready for Fast Scan</span>
         <span id="universe-count-badge">0 Stocks</span>
     </div>
 
@@ -216,24 +215,24 @@
         <div class="idx-pill active" id="idx-ALL" onclick="setIndexFilter('ALL')">All NSE (<span id="c-ALL">0</span>)</div>
         <div class="idx-pill" id="idx-NIFTY50" onclick="setIndexFilter('NIFTY50')">NIFTY 50 (<span id="c-NIFTY50">0</span>)</div>
         <div class="idx-pill" id="idx-NIFTY100" onclick="setIndexFilter('NIFTY100')">NIFTY 100 (<span id="c-NIFTY100">0</span>)</div>
-        <div class="idx-pill" id="idx-MIDCAP" onclick="setIndexFilter('MIDCAP')">Midcap 150 (<span id="c-MIDCAP">0</span>)</div>
-        <div class="idx-pill" id="idx-SMALLCAP" onclick="setIndexFilter('SMALLCAP')">Smallcap 250 (<span id="c-SMALLCAP">0</span>)</div>
-        <div class="idx-pill" id="idx-FNO" onclick="setIndexFilter('FNO')">⚡ F&O Only (<span id="c-FNO">0</span>)</div>
+        <div class="idx-pill" id="idx-MIDCAP" onclick="setIndexFilter('MIDCAP')">Midcap (<span id="c-MIDCAP">0</span>)</div>
+        <div class="idx-pill" id="idx-SMALLCAP" onclick="setIndexFilter('SMALLCAP')">Smallcap (<span id="c-SMALLCAP">0</span>)</div>
+        <div class="idx-pill" id="idx-FNO" onclick="setIndexFilter('FNO')">⚡ F&O (<span id="c-FNO">0</span>)</div>
     </div>
 
     <div class="search-bar">
         <input type="text" id="new-symbol-input" placeholder="NSE Symbol डालें (जैसे: MARUTI, TITAN)">
-        <button onclick="addCustomNSESymbol()">+ Instant Scan</button>
+        <button onclick="addCustomNSESymbol()">+ Quick Scan</button>
     </div>
 
     <div class="mode-tabs">
-        <div class="mode-btn active" id="mode-CROSS" onclick="setFilter('CROSS')">⚡ Crossing Next Zone (<span id="cnt-cross">0</span>)</div>
-        <div class="mode-btn" id="mode-ALL" onclick="setFilter('ALL')">📊 All Next Period Levels (<span id="cnt-all">0</span>)</div>
+        <div class="mode-btn active" id="mode-CROSS" onclick="setFilter('CROSS')">⚡ Full-Day & Live Cross (<span id="cnt-cross">0</span>)</div>
+        <div class="mode-btn" id="mode-ALL" onclick="setFilter('ALL')">📊 All Scanned Stocks (<span id="cnt-all">0</span>)</div>
     </div>
 
     <div class="breadcrumb" id="breadcrumb"></div>
     <div class="container" id="main-container">
-        <div class="loader">तेज़ स्कैनिंग शुरू हो रही है...</div>
+        <div class="loader">आज के पूरे दिन में ज़ोन क्रॉस करने वाले स्टॉक्स स्कैन हो रहे हैं...</div>
     </div>
 
     <!-- VISUAL CHART & SMA MODAL -->
@@ -264,8 +263,8 @@
             { id: 'Yearly',     title: 'Yearly (12M)',     periodName: 'Next Year',      nextLabel: 'Next Year' }
         ];
 
-        let WATCHLIST = JSON.parse(localStorage.getItem('md_nse_500_universe_v2')) || [
-            // NIFTY 50 & F&O
+        // Focused Liquid NSE Universe (Nifty 50, Nifty 100, Midcap, Smallcap & F&O)
+        let WATCHLIST = JSON.parse(localStorage.getItem('md_nse_fast_watchlist_v1')) || [
             { symbol: "RELIANCE", name: "Reliance Industries Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Oil, Gas & Energy", theme: "Energy & Telecom", industry: "Refineries" },
             { symbol: "HDFCBANK", name: "HDFC Bank Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank" },
             { symbol: "ICICIBANK", name: "ICICI Bank Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Private Banking", industry: "Private Bank" },
@@ -276,81 +275,71 @@
             { symbol: "BHARTIARTL", name: "Bharti Airtel Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Telecom", theme: "5G & Digital", industry: "Telecom Services" },
             { symbol: "ITC", name: "ITC Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Rural Consumption", industry: "Diversified FMCG" },
             { symbol: "TATAMOTORS", name: "Tata Motors Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "Electric Vehicles", industry: "Automobiles" },
-            { symbol: "M&M", name: "Mahindra & Mahindra", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "SUV & Farm Equip", industry: "Automobiles" },
             { symbol: "MARUTI", name: "Maruti Suzuki India", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Auto & EV", theme: "Passenger Vehicles", industry: "Automobiles" },
             { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Ind", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Pharma & Healthcare", theme: "Specialty Pharma", industry: "Pharmaceuticals" },
             { symbol: "NTPC", name: "NTPC Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Power & Renewables", theme: "Green Energy", industry: "Power Generation" },
             { symbol: "BAJFINANCE", name: "Bajaj Finance Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Consumer NBFC", industry: "NBFC" },
             { symbol: "TRENT", name: "Trent Limited", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Fashion Retail", industry: "Retail" },
             { symbol: "BEL", name: "Bharat Electronics Ltd", index: "NIFTY 50", cap: "Large Cap", fno: true, sector: "Defense & Aerospace", theme: "Defense Electronics", industry: "Defense" },
-
-            // NIFTY NEXT 50 (NIFTY 100) & F&O
             { symbol: "HAL", name: "Hindustan Aeronautics Ltd", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Defense & Aerospace", theme: "Make in India Defense", industry: "Aerospace" },
-            { symbol: "VBL", name: "Varun Beverages Ltd", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "FMCG & Consumption", theme: "Beverages", industry: "Packaged Foods" },
             { symbol: "ZOMATO", name: "Zomato Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "IT & Digital", theme: "Quick Commerce", industry: "E-Commerce" },
             { symbol: "DLF", name: "DLF Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "Luxury Real Estate", industry: "Realty" },
-            { symbol: "SIEMENS", name: "Siemens Limited", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Infra & Capital Goods", theme: "Smart Grid", industry: "Heavy Electricals" },
-            { symbol: "PFC", name: "Power Finance Corp", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Power Financing", industry: "PSU NBFC" },
-            { symbol: "CHOLAFIN", name: "Cholamandalam Inv & Fin", index: "NIFTY 100", cap: "Large Cap", fno: true, sector: "Banking & Finance", theme: "Vehicle Finance", industry: "NBFC" },
-
-            // MIDCAP 150
             { symbol: "MAZDOCK", name: "Mazagon Dock Shipbuilders", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Defense & Aerospace", theme: "Naval Shipbuilding", industry: "Shipbuilding" },
             { symbol: "KPITTECH", name: "KPIT Technologies Ltd", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "EV Software", industry: "Engineering R&D" },
             { symbol: "DIXON", name: "Dixon Technologies", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "Electronics Mfg (EMS)", industry: "Consumer Electronics" },
-            { symbol: "POLYCAB", name: "Polycab India Ltd", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Infra & Capital Goods", theme: "Cables & Wires", industry: "Electricals" },
             { symbol: "RVNL", name: "Rail Vikas Nigam Ltd", index: "Midcap 150", cap: "Mid Cap", fno: false, sector: "Infra & Capital Goods", theme: "Railway Capex", industry: "Railways" },
-            { symbol: "IRCTC", name: "IRCTC Limited", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "IT & Digital", theme: "Railway Tourism", industry: "Travel Services" },
             { symbol: "BSE", name: "BSE Limited", index: "Midcap 150", cap: "Mid Cap", fno: true, sector: "Banking & Finance", theme: "Capital Markets", industry: "Stock Exchange" },
-            { symbol: "SUZLON", name: "Suzlon Energy Ltd", index: "Midcap 150", cap: "Mid Cap", fno: false, sector: "Power & Renewables", theme: "Wind Energy", industry: "Renewables" },
-
-            // SMALLCAP 250
             { symbol: "CDSL", name: "Central Depository Services", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Demat & Capital Mkt", industry: "Depository" },
-            { symbol: "ANGELONE", name: "Angel One Limited", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Retail Broking", industry: "Stock Broking" },
-            { symbol: "KEC", name: "KEC International Ltd", index: "Smallcap 250", cap: "Small Cap", fno: false, sector: "Infra & Capital Goods", theme: "Power T&D", industry: "Engineering" },
-            { symbol: "TEJASNET", name: "Tejas Networks Ltd", index: "Smallcap 250", cap: "Small Cap", fno: false, sector: "Telecom", theme: "5G & Optical Gear", industry: "Telecom Equipment" },
-            { symbol: "DATAPATTNS", name: "Data Patterns (India)", index: "Smallcap 250", cap: "Small Cap", fno: false, sector: "Defense & Aerospace", theme: "Defense Radar", industry: "Defense Electronics" }
+            { symbol: "ANGELONE", name: "Angel One Limited", index: "Smallcap 250", cap: "Small Cap", fno: true, sector: "Banking & Finance", theme: "Retail Broking", industry: "Stock Broking" }
         ];
 
-        // Load cached results instantly for 0-second startup!
-        let calculatedRecords = JSON.parse(localStorage.getItem('md_turbo_cache_records')) || [];
-        let filterMode = 'CROSS';
+        let calculatedRecords = JSON.parse(localStorage.getItem('md_fast_cache_v2')) || [];
+        let filterMode = 'CROSS'; // Default: ONLY Full-Day & Live Crossing Stocks!
         let indexFilter = 'ALL';
         let nav = { tf: null, sector: null };
 
         function calcSMA(closesArray, length) {
             if (closesArray.length < length) return closesArray[closesArray.length - 1];
             let sum = 0;
-            for (let i = closesArray.length - length; i < closesArray.length; i++) {
-                sum += closesArray[i];
-            }
+            for (let i = closesArray.length - length; i < closesArray.length; i++) sum += closesArray[i];
             return sum / length;
         }
 
-        // TURBO MULTI-PROXY RACE FETCHER (Whichever proxy responds fastest wins!)
-        async function fetchFastYahooJSON(symbol) {
-            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}.NS?range=5y&interval=1d`;
-            
+        // Fetch with strict 4-second abort timeout so nothing EVER hangs!
+        function fetchWithTimeout(url, ms = 4000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), ms);
+            return fetch(url, { signal: controller.signal })
+                .then(res => {
+                    clearTimeout(timer);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .catch(err => {
+                    clearTimeout(timer);
+                    throw err;
+                });
+        }
+
+        // Fast 1-Year Fetch for Instant Crossover Calculation
+        async function fetchFastYahooJSON(symbol, rangeStr = '1y') {
+            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}.NS?range=${rangeStr}&interval=1d`;
             const proxies = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`,
                 `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`,
                 `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`
             ];
 
-            const requests = proxies.map(url => 
-                fetch(url).then(res => {
-                    if (!res.ok) throw new Error('Proxy failed');
-                    return res.json();
-                }).then(json => {
-                    if (!json || !json.chart || !json.chart.result) throw new Error('Invalid JSON');
+            return Promise.any(
+                proxies.map(p => fetchWithTimeout(p, 4500).then(json => {
+                    if (!json?.chart?.result?.[0]) throw new Error('Bad JSON');
                     return json;
-                })
+                }))
             );
-
-            return Promise.any(requests);
         }
 
-        async function fetchStockHistoryNSE(stockMeta) {
-            const data = await fetchFastYahooJSON(stockMeta.symbol);
+        async function scanSingleStockFast(stockMeta, rangeStr = '1y') {
+            const data = await fetchFastYahooJSON(stockMeta.symbol, rangeStr);
             const result = data.chart.result[0];
             const timestamps = result.timestamp;
             const quote = result.indicators.quote[0];
@@ -368,7 +357,7 @@
                 }
             }
 
-            if (candles.length < 255) return [];
+            if (candles.length < 50) return [];
 
             const latestCandle = candles[candles.length - 1];
             const currentClose = meta.regularMarketPrice || latestCandle.close;
@@ -379,29 +368,24 @@
             dailyCloses[dailyCloses.length - 1] = currentClose;
 
             let weeklyCloses = [];
-            for (let i = dailyCloses.length - 1; i >= 0; i -= 5) {
-                weeklyCloses.unshift(dailyCloses[i]);
-            }
+            for (let i = dailyCloses.length - 1; i >= 0; i -= 5) weeklyCloses.unshift(dailyCloses[i]);
 
             const smas = {
                 daily20:   calcSMA(dailyCloses, 20),
                 daily50:   calcSMA(dailyCloses, 50),
                 daily200:  calcSMA(dailyCloses, 200),
                 weekly20:  calcSMA(weeklyCloses, 20),
-                weekly200: calcSMA(weeklyCloses, 200)
+                weekly200: calcSMA(weeklyCloses, Math.min(200, weeklyCloses.length))
             };
 
-            const chartCandles = candles.slice(-40).map((c, idx, arr) => {
-                if (idx === arr.length - 1) {
-                    return { open: c.open, high: todayHigh, low: todayLow, close: currentClose };
-                }
+            const chartCandles = candles.slice(-35).map((c, idx, arr) => {
+                if (idx === arr.length - 1) return { open: c.open, high: todayHigh, low: todayLow, close: currentClose };
                 return c;
             });
 
             function getCurrentPeriodOHLC(daysCount) {
                 const slice = candles.slice(Math.max(0, candles.length - daysCount));
-                let curHigh = currentClose;
-                let curLow = currentClose;
+                let curHigh = currentClose, curLow = currentClose;
                 for (let c of slice) {
                     if (c.high > curHigh) curHigh = c.high;
                     if (c.low < curLow) curLow = c.low;
@@ -415,7 +399,7 @@
                 Monthly:    getCurrentPeriodOHLC(21),
                 Quarterly:  getCurrentPeriodOHLC(63),
                 HalfYearly: getCurrentPeriodOHLC(125),
-                Yearly:     getCurrentPeriodOHLC(252)
+                Yearly:     getCurrentPeriodOHLC(Math.min(252, candles.length))
             };
 
             let stockEntries = [];
@@ -432,8 +416,9 @@
                 const gapPoints = Math.max(0, nextCamR3 - currentClose);
                 const gapPct = (gapPoints / currentClose) * 100;
 
-                const isCrossingNextZone = (todayLow <= nextZoneHigh && todayHigh >= nextZoneLow) ||
-                                           (Math.abs(currentClose - nextZoneHigh) / currentClose <= 0.015);
+                // Full Day & Live Crossover Check (Today's Candle touched/crossed Next Period Zone OR within 1.2%)
+                const touchedToday = (todayLow <= nextZoneHigh && todayHigh >= nextZoneLow);
+                const nearZoneNow  = (Math.abs(currentClose - nextZoneHigh) / currentClose <= 0.012);
 
                 stockEntries.push({
                     ...stockMeta,
@@ -448,7 +433,8 @@
                     nextZoneHigh: parseFloat(nextZoneHigh.toFixed(2)),
                     gapPoints: parseFloat(gapPoints.toFixed(2)),
                     gapPct: parseFloat(gapPct.toFixed(2)),
-                    isCrossing: isCrossingNextZone,
+                    isCrossing: touchedToday || nearZoneNow,
+                    exactTouch: touchedToday,
                     smas: {
                         daily20: parseFloat(smas.daily20.toFixed(2)),
                         daily50: parseFloat(smas.daily50.toFixed(2)),
@@ -463,51 +449,59 @@
             return stockEntries;
         }
 
-        // HIGH-SPEED 15-STOCK PARALLEL BURST ENGINE
-        async function fetchAllRealNSEStocks(forceRefresh = false) {
+        // ULTRA-FAST PARALLEL SCAN (All stocks launched concurrently with 4s timeout!)
+        async function runFastFullDayScan() {
             const statusEl = document.getElementById('sync-status');
             const progressEl = document.getElementById('scan-progress');
             document.getElementById('universe-count-badge').innerText = `${WATCHLIST.length} NSE Stocks`;
             
             const startTime = performance.now();
-            let allResults = [];
-            const batchSize = 15; // 15 stocks simultaneously!
+            let completed = 0;
+            let freshResults = [];
 
-            for (let i = 0; i < WATCHLIST.length; i += batchSize) {
-                const batch = WATCHLIST.slice(i, i + batchSize);
-                const pct = Math.round(((i + batch.length) / WATCHLIST.length) * 100);
-                progressEl.style.width = `${pct}%`;
-                statusEl.innerText = `⚡ Turbo Scanning: ${pct}%`;
-                
-                const promises = batch.map(st => fetchStockHistoryNSE(st).catch(() => []));
-                const batchRes = await Promise.all(promises);
-                batchRes.forEach(arr => allResults.push(...arr));
-                
-                if (allResults.length > 0) {
-                    calculatedRecords = allResults;
-                    render();
-                }
-            }
+            statusEl.innerText = `⚡ Fast Scanning ${WATCHLIST.length} Stocks...`;
+            progressEl.style.width = '10%';
 
-            if (allResults.length > 0) {
-                localStorage.setItem('md_turbo_cache_records', JSON.stringify(allResults));
-                const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
-                const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-                statusEl.innerHTML = `<span style="color:#10b981;">✅ Done in ${elapsed}s (${WATCHLIST.length} Stocks &bull; ${now})</span>`;
-                setTimeout(() => { progressEl.style.width = '0%'; }, 1200);
+            const tasks = WATCHLIST.map(st => 
+                scanSingleStockFast(st, '1y')
+                    .then(entries => {
+                        completed++;
+                        const pct = Math.round((completed / WATCHLIST.length) * 100);
+                        progressEl.style.width = `${pct}%`;
+                        statusEl.innerText = `⚡ Scanned ${completed}/${WATCHLIST.length} (${pct}%)`;
+                        if (entries.length > 0) {
+                            freshResults.push(...entries);
+                            calculatedRecords = [...freshResults];
+                            render();
+                        }
+                    })
+                    .catch(() => {
+                        completed++;
+                    })
+            );
+
+            await Promise.allSettled(tasks);
+
+            if (freshResults.length > 0) {
+                calculatedRecords = freshResults;
+                localStorage.setItem('md_fast_cache_v2', JSON.stringify(freshResults));
+                const sec = ((performance.now() - startTime) / 1000).toFixed(1);
+                const crossingCount = freshResults.filter(r => r.isCrossing).length;
+                statusEl.innerHTML = `<span style="color:#10b981;">✅ Done in ${sec}s &bull; ${crossingCount} Crossings Found</span>`;
+                render();
             } else {
-                statusEl.innerText = "⚠️ Network busy. Tap 'Turbo Scan' again.";
+                statusEl.innerText = "⚠️ Server busy. Tap 'Fast Scan' again.";
             }
+            setTimeout(() => { progressEl.style.width = '0%'; }, 1000);
         }
 
-        // INSTANT SINGLE STOCK SCAN (0.8 seconds!)
         async function addCustomNSESymbol() {
             const input = document.getElementById('new-symbol-input');
             const sym = input.value.trim().toUpperCase().replace('.NS', '');
             if (!sym) return;
 
             const statusEl = document.getElementById('sync-status');
-            statusEl.innerText = `⚡ Instant Scanning ${sym}...`;
+            statusEl.innerText = `⚡ Scanning ${sym}...`;
 
             let stockMeta = WATCHLIST.find(s => s.symbol === sym);
             if (!stockMeta) {
@@ -522,21 +516,22 @@
                     industry: "Equity"
                 };
                 WATCHLIST.unshift(stockMeta);
-                localStorage.setItem('md_nse_500_universe_v2', JSON.stringify(WATCHLIST));
+                localStorage.setItem('md_nse_fast_watchlist_v1', JSON.stringify(WATCHLIST));
             }
 
             input.value = '';
             try {
-                const entries = await fetchStockHistoryNSE(stockMeta);
+                const entries = await scanSingleStockFast(stockMeta, '1y');
                 if (entries.length > 0) {
                     calculatedRecords = calculatedRecords.filter(r => r.symbol !== sym);
                     calculatedRecords.unshift(...entries);
-                    localStorage.setItem('md_turbo_cache_records', JSON.stringify(calculatedRecords));
-                    statusEl.innerHTML = `<span style="color:#10b981;">✅ ${sym} Scanned Instantly!</span>`;
+                    localStorage.setItem('md_fast_cache_v2', JSON.stringify(calculatedRecords));
+                    statusEl.innerHTML = `<span style="color:#10b981;">✅ ${sym} Ready!</span>`;
+                    setFilter('ALL');
                     render();
                 }
             } catch (e) {
-                statusEl.innerText = `⚠️ ${sym} not found on NSE.`;
+                statusEl.innerText = `⚠️ ${sym} not found.`;
             }
         }
 
@@ -589,7 +584,7 @@
             const bc         = document.getElementById('breadcrumb');
 
             if (!nav.tf) {
-                bc.innerHTML = `<span>📊 ${indexFilter} Universe &rsaquo; Select Timeframe</span>`;
+                bc.innerHTML = `<span>📊 ${indexFilter} &rsaquo; Select Timeframe (${filterMode === 'CROSS' ? 'Full-Day & Live Crossings' : 'All Scanned'})</span>`;
                 let html = `<div class="tf-grid">`;
                 TIMEFRAMES.forEach(tf => {
                     const list = activeList.filter(s => s.tf === tf.id);
@@ -616,7 +611,7 @@
                             <div class="sector-count-pill">${grouped[sec].length} Stocks &rsaquo;</div>
                         </div>`;
                 });
-                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस फ़िल्टर में कोई स्टॉक नहीं है।</p>`;
+                container.innerHTML = html || `<p style="color:#94a3b8;text-align:center;">इस टाइमफ्रेम में आज कोई क्रॉसओवर नहीं मिला। ऊपर 'All Scanned Stocks' देखें।</p>`;
             } else {
                 const tfObj = TIMEFRAMES.find(t => t.id === nav.tf);
                 bc.innerHTML = `<a onclick="goHome()">All TF</a> &rsaquo; <a onclick="openTF('${nav.tf}')">${tfObj.title}</a> &rsaquo; <span>${nav.sector}</span>`;
@@ -624,15 +619,15 @@
                 let html = ``;
                 list.forEach(st => {
                     html += `
-                        <div class="stock-card" style="border-left-color: ${st.isCrossing ? 'var(--green)' : 'var(--amber)'};">
+                        <div class="stock-card" style="border-left-color: ${st.exactTouch ? 'var(--green)' : 'var(--amber)'};">
                             <div class="stock-top">
                                 <div>
                                     <div class="stock-sym">NSE: ${st.symbol}</div>
                                     <div style="font-size:0.74rem;color:#94a3b8;">${st.name}</div>
                                     <div class="badges-row">
-                                        <span class="idx-badge">${st.index} (${st.cap})</span>
-                                        ${st.fno ? `<span class="fno-badge">F&O</span>` : `<span class="idx-badge" style="color:#94a3b8;">CASH ONLY</span>`}
-                                        ${st.isCrossing ? `<span class="cross-badge">⚡ ZONE CROSS</span>` : ``}
+                                        <span class="idx-badge">${st.index}</span>
+                                        ${st.fno ? `<span class="fno-badge">F&O</span>` : `<span class="idx-badge" style="color:#94a3b8;">CASH</span>`}
+                                        <span class="cross-badge">${st.exactTouch ? '⚡ CROSSED TODAY' : '🎯 NEAR ZONE'}</span>
                                     </div>
                                 </div>
                                 <div>
@@ -670,12 +665,31 @@
             }
         }
 
-        function openVisualChart(symbol, tfId) {
+        // On-Demand Chart Opener (Fetches 5y data for exact Weekly 200 SMA only when clicked!)
+        async function openVisualChart(symbol, tfId) {
             const st = calculatedRecords.find(r => r.symbol === symbol && r.tf === tfId);
             if (!st) return;
 
             const tfObj = TIMEFRAMES.find(t => t.id === tfId);
             document.getElementById('modal-stock-title').innerText = `NSE: ${st.symbol} (${st.index} ${st.fno ? '| F&O' : ''})`;
+            document.getElementById('modal-stock-sub').innerText = `Loading exact 5Y Weekly/Daily SMAs...`;
+            document.getElementById('chartModal').style.display = 'flex';
+
+            renderChartModalContent(st, tfObj);
+
+            // Upgrade SMAs with exact 5-Year Weekly 200 data in background
+            try {
+                const fullEntries = await scanSingleStockFast(st, '5y');
+                const upgraded = fullEntries.find(r => r.tf === tfId);
+                if (upgraded) {
+                    st.smas = upgraded.smas;
+                    st.chartCandles = upgraded.chartCandles;
+                    renderChartModalContent(st, tfObj);
+                }
+            } catch (e) {}
+        }
+
+        function renderChartModalContent(st, tfObj) {
             document.getElementById('modal-stock-sub').innerText = `Close: ₹${st.currentClose} | ${tfObj.nextLabel} Zone, Hurdle & 5 SMAs`;
 
             const legendItems = [
@@ -698,7 +712,6 @@
                 </div>
             `).join('');
 
-            document.getElementById('chartModal').style.display = 'flex';
             drawStockCanvas(st);
         }
 
@@ -792,11 +805,8 @@
             ctx.fill();
         }
 
-        // Instant render from local cache first, then background turbo sync
-        if (calculatedRecords.length > 0) {
-            render();
-        }
-        fetchAllRealNSEStocks(false);
+        if (calculatedRecords.length > 0) render();
+        runFastFullDayScan();
     </script>
 </body>
 </html>
